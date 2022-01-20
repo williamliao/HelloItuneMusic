@@ -9,13 +9,16 @@
 /* Begin PBXBuildFile section */
 		C81286BC2799251200586D33 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C81286BB2799251200586D33 /* AppDelegate.swift */; };
 		C81286BE2799251200586D33 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C81286BD2799251200586D33 /* SceneDelegate.swift */; };
-		C81286C02799251200586D33 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C81286BF2799251200586D33 /* ViewController.swift */; };
 		C81286C32799251200586D33 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C81286C12799251200586D33 /* Main.storyboard */; };
 		C81286C52799251400586D33 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C81286C42799251400586D33 /* Assets.xcassets */; };
 		C81286C82799251400586D33 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C81286C62799251400586D33 /* LaunchScreen.storyboard */; };
 		C81286D32799251400586D33 /* HelloItuneMusicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C81286D22799251400586D33 /* HelloItuneMusicTests.swift */; };
 		C81286DD2799251400586D33 /* HelloItuneMusicUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C81286DC2799251400586D33 /* HelloItuneMusicUITests.swift */; };
 		C81286DF2799251400586D33 /* HelloItuneMusicUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C81286DE2799251400586D33 /* HelloItuneMusicUITestsLaunchTests.swift */; };
+		C81286F0279925CF00586D33 /* ItemSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C81286EF279925CF00586D33 /* ItemSearchView.swift */; };
+		C81286F2279925E000586D33 /* ItemSearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C81286F1279925E000586D33 /* ItemSearchViewController.swift */; };
+		C81286F42799261D00586D33 /* ItemSearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C81286F32799261D00586D33 /* ItemSearchViewModel.swift */; };
+		C81286F62799264900586D33 /* ItemSearchModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C81286F52799264900586D33 /* ItemSearchModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -39,7 +42,6 @@
 		C81286B82799251200586D33 /* HelloItuneMusic.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HelloItuneMusic.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C81286BB2799251200586D33 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		C81286BD2799251200586D33 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		C81286BF2799251200586D33 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		C81286C22799251200586D33 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		C81286C42799251400586D33 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C81286C72799251400586D33 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -49,6 +51,10 @@
 		C81286D82799251400586D33 /* HelloItuneMusicUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HelloItuneMusicUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C81286DC2799251400586D33 /* HelloItuneMusicUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelloItuneMusicUITests.swift; sourceTree = "<group>"; };
 		C81286DE2799251400586D33 /* HelloItuneMusicUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelloItuneMusicUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		C81286EF279925CF00586D33 /* ItemSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemSearchView.swift; sourceTree = "<group>"; };
+		C81286F1279925E000586D33 /* ItemSearchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemSearchViewController.swift; sourceTree = "<group>"; };
+		C81286F32799261D00586D33 /* ItemSearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemSearchViewModel.swift; sourceTree = "<group>"; };
+		C81286F52799264900586D33 /* ItemSearchModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemSearchModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,9 +105,9 @@
 		C81286BA2799251200586D33 /* HelloItuneMusic */ = {
 			isa = PBXGroup;
 			children = (
+				C81286EE2799259200586D33 /* Search */,
 				C81286BB2799251200586D33 /* AppDelegate.swift */,
 				C81286BD2799251200586D33 /* SceneDelegate.swift */,
-				C81286BF2799251200586D33 /* ViewController.swift */,
 				C81286C12799251200586D33 /* Main.storyboard */,
 				C81286C42799251400586D33 /* Assets.xcassets */,
 				C81286C62799251400586D33 /* LaunchScreen.storyboard */,
@@ -125,6 +131,41 @@
 				C81286DE2799251400586D33 /* HelloItuneMusicUITestsLaunchTests.swift */,
 			);
 			path = HelloItuneMusicUITests;
+			sourceTree = "<group>";
+		};
+		C81286EB2799257B00586D33 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				C81286EF279925CF00586D33 /* ItemSearchView.swift */,
+				C81286F1279925E000586D33 /* ItemSearchViewController.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		C81286EC2799258000586D33 /* ViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				C81286F32799261D00586D33 /* ItemSearchViewModel.swift */,
+			);
+			path = ViewModel;
+			sourceTree = "<group>";
+		};
+		C81286ED2799258A00586D33 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				C81286F52799264900586D33 /* ItemSearchModel.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		C81286EE2799259200586D33 /* Search */ = {
+			isa = PBXGroup;
+			children = (
+				C81286ED2799258A00586D33 /* Model */,
+				C81286EC2799258000586D33 /* ViewModel */,
+				C81286EB2799257B00586D33 /* View */,
+			);
+			path = Search;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -258,9 +299,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C81286C02799251200586D33 /* ViewController.swift in Sources */,
+				C81286F62799264900586D33 /* ItemSearchModel.swift in Sources */,
 				C81286BC2799251200586D33 /* AppDelegate.swift in Sources */,
+				C81286F42799261D00586D33 /* ItemSearchViewModel.swift in Sources */,
 				C81286BE2799251200586D33 /* SceneDelegate.swift in Sources */,
+				C81286F2279925E000586D33 /* ItemSearchViewController.swift in Sources */,
+				C81286F0279925CF00586D33 /* ItemSearchView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
