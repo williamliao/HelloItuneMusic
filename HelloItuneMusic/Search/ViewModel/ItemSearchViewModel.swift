@@ -22,9 +22,9 @@ class ItemSearchViewModel {
 
 extension ItemSearchViewModel {
     
-    func searchTask() async throws {
+    func searchTask(term: String) async throws {
         
-        guard let enPoint = EndPoint.search(matching: "").url else {
+        guard let enPoint = EndPoint.search(matching: term).url else {
             throw NetworkError.invalidURL
         }
 

@@ -21,6 +21,7 @@
 		C81286F62799264900586D33 /* ItemSearchModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C81286F52799264900586D33 /* ItemSearchModel.swift */; };
 		C81286FB2799287200586D33 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = C81286FA2799287200586D33 /* APIClient.swift */; };
 		C81286FD2799293B00586D33 /* EndPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = C81286FC2799293B00586D33 /* EndPoint.swift */; };
+		C812870127992EA600586D33 /* ItemSearchCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C812870027992EA600586D33 /* ItemSearchCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -59,6 +60,7 @@
 		C81286F52799264900586D33 /* ItemSearchModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemSearchModel.swift; sourceTree = "<group>"; };
 		C81286FA2799287200586D33 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		C81286FC2799293B00586D33 /* EndPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndPoint.swift; sourceTree = "<group>"; };
+		C812870027992EA600586D33 /* ItemSearchCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemSearchCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -143,6 +145,7 @@
 			children = (
 				C81286EF279925CF00586D33 /* ItemSearchView.swift */,
 				C81286F1279925E000586D33 /* ItemSearchViewController.swift */,
+				C812870027992EA600586D33 /* ItemSearchCell.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -316,6 +319,7 @@
 				C81286F62799264900586D33 /* ItemSearchModel.swift in Sources */,
 				C81286FB2799287200586D33 /* APIClient.swift in Sources */,
 				C81286FD2799293B00586D33 /* EndPoint.swift in Sources */,
+				C812870127992EA600586D33 /* ItemSearchCell.swift in Sources */,
 				C81286BC2799251200586D33 /* AppDelegate.swift in Sources */,
 				C81286F42799261D00586D33 /* ItemSearchViewModel.swift in Sources */,
 				C81286BE2799251200586D33 /* SceneDelegate.swift in Sources */,
