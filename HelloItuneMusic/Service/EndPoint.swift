@@ -17,7 +17,7 @@ extension EndPoint {
         return EndPoint(
             path: "/search",
             queryItems: [
-                URLQueryItem(name: "q", value: term),
+                URLQueryItem(name: "term", value: term),
             ]
         )
     }

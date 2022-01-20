@@ -25,6 +25,7 @@ class ItemSearchView: UIView {
         self.navItem = navItem
         super.init(frame: CGRect.zero)
         configureView()
+        configureDataSource()
         configureConstraints()
     }
  
@@ -32,16 +33,19 @@ class ItemSearchView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private var searchDataSource: UICollectionViewDiffableDataSource<Section, Results>!
+    private var searchDataSource: UICollectionViewDiffableDataSource<Section, SearchItem>!
 }
 
 // MARK: - View
 extension ItemSearchView {
     func configureView() {
-        collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+        let flowLayout = UICollectionViewFlowLayout()
+        flowLayout.estimatedItemSize = .zero
+        collectionView = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
         collectionView.backgroundColor = .clear
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.dataSource = self.searchDataSource
+        collectionView.delegate = self
         if #available(iOS 13.0, *) {
             collectionView.register(ItemSearchCell.self, forCellWithReuseIdentifier: ItemSearchCell.reuseIdentifier)
         }
@@ -60,6 +64,12 @@ extension ItemSearchView {
         navItem.searchController = searchViewController
         searchViewController.hidesNavigationBarDuringPresentation = false
         navItem.hidesSearchBarWhenScrolling = false
+        
+        viewModel.reloadCollectionView = { [weak self] in
+            DispatchQueue.main.async {
+                self?.applyInitialSnapshots()
+            }
+        }
     }
     
     func configureConstraints()  {
@@ -72,26 +82,71 @@ extension ItemSearchView {
     }
 }
 
+// MARK: - UICollectionViewDelegateFlowLayout
+
+extension ItemSearchView: UICollectionViewDelegateFlowLayout {
+    
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        sizeForItemAt indexPath: IndexPath) -> CGSize {
+        
+        let width = UIScreen.main.bounds.size.width
+        if viewModel.searchModel.results.count == 0 {
+            return CGSize(width: width, height: 44)
+        }
+        
+        let res = viewModel.searchModel.results[indexPath.row]
+        
+        if let longDescription = res.longDescription {
+            
+            let constraintRect = CGSize(width: width, height: .greatestFiniteMagnitude)
+            let boundingBox = longDescription.boundingRect(with: constraintRect, options: .usesLineFragmentOrigin, attributes: [NSAttributedString.Key.font : UIFont.systemFont(ofSize: 16)], context: nil)
+            
+            return CGSize(width: width, height: 44 + ceil(boundingBox.height))
+        } else {
+            return CGSize(width: width, height: 44)
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        insetForSectionAt section: Int) -> UIEdgeInsets {
+        return UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 10
+    }
+    
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 10
+    }
+}
+
 // MARK: - UICollectionViewDiffableDataSource
 extension ItemSearchView {
     func configureDataSource() {
        
         if #available(iOS 14.0, *) {
             
-            let configuredMainCell = UICollectionView.CellRegistration<ItemSearchCell, Results> { (cell, indexPath, itemIdentifier) in
-                
+            let configuredMainCell = UICollectionView.CellRegistration<ItemSearchCell, SearchItem> { (cell, indexPath, itemIdentifier) in
+                cell.configureCell(name: itemIdentifier.name, des: itemIdentifier.longDescription, imageUrl: itemIdentifier.artworkUrl100)
             }
             
-            searchDataSource = UICollectionViewDiffableDataSource<Section, Results>(collectionView: collectionView) {
-                (collectionView: UICollectionView, indexPath: IndexPath, identifier: Results) -> ItemSearchCell? in
+            searchDataSource = UICollectionViewDiffableDataSource<Section, SearchItem>(collectionView: collectionView) {
+                (collectionView: UICollectionView, indexPath: IndexPath, identifier: SearchItem) -> ItemSearchCell? in
                 return collectionView.dequeueConfiguredReusableCell(using: configuredMainCell, for: indexPath, item: identifier)
             }
             
         } else {
             // Fallback on earlier versions
             
-            searchDataSource = UICollectionViewDiffableDataSource<Section, Results>(collectionView: collectionView) {
-                (collectionView: UICollectionView, indexPath: IndexPath, identifier: Results) -> UICollectionViewCell? in
+            searchDataSource = UICollectionViewDiffableDataSource<Section, SearchItem>(collectionView: collectionView) {
+                (collectionView: UICollectionView, indexPath: IndexPath, identifier: SearchItem) -> UICollectionViewCell? in
                 return collectionView.dequeueReusableCell(withReuseIdentifier: ItemSearchCell.reuseIdentifier, for: indexPath)
             }
         }
@@ -110,12 +165,13 @@ extension ItemSearchView {
     
     func configureSearchItem() {
        
-        var snapshot = NSDiffableDataSourceSnapshot<Section, Results>()
+        var snapshot = NSDiffableDataSourceSnapshot<Section, SearchItem>()
  
         Section.allCases.forEach { snapshot.appendSections([$0]) }
+        searchDataSource.apply(snapshot, animatingDifferences: false)
         
-        if let search = viewModel.searchModel {
-            snapshot.appendItems(search.results, toSection: .main)
+        if  viewModel.searchItem.count > 0 {
+            snapshot.appendItems(viewModel.searchItem, toSection: .main)
         } else {
             snapshot.appendItems([], toSection: .main)
         }

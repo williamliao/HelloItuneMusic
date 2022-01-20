@@ -14,6 +14,7 @@ class ItemSearchViewModel {
     var reloadCollectionView: (() -> Void)?
     var showError: ((_ error:NetworkError) -> Void)?
     var searchModel: ItemSearchModel!
+    var searchItem = [SearchItem]()
     
     init(apiClient: APIClient) {
         self.apiClient = apiClient
@@ -38,16 +39,22 @@ extension ItemSearchViewModel {
             switch result {
                 case .success(let responseObject):
                     searchModel = responseObject
-                    break
+
+                searchModel.results.forEach { result in
+                    let item = SearchItem(id: UUID() ,name: result.trackName, longDescription: result.longDescription, artworkUrl100: result.artworkUrl100)
+                    searchItem.append(item)
+                }
                 
+                
+                    reloadCollectionView?()
                 case .failure(let error):
-                    print("searchRepositories \(error)")
+                    print("searchTask \(error)")
                     showError?(error)
             }
             
         }  catch  {
             isFetching = false
-            print("searchRepositories error \(error)")
+            print("searchTask error \(error)")
             showError?(error as? NetworkError ?? NetworkError.unKnown)
         }
         
