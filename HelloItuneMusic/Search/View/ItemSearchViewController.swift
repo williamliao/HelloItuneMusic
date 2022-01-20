@@ -8,9 +8,30 @@
 import UIKit
 
 class ItemSearchViewController: UIViewController {
+    
+    var searchView: ItemSearchView!
+    var viewModel: ItemSearchViewModel!
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        renderView()
+    }
+    
+    func renderView() {
+       
+        viewModel = ItemSearchViewModel(apiClient: APIClient())
+        
+        self.title = "Search"
+        searchView = ItemSearchView(viewModel: viewModel, navItem: self.navigationItem)
+        searchView.translatesAutoresizingMaskIntoConstraints = false
+        
+        self.view.addSubview(searchView)
+        
+        NSLayoutConstraint.activate([
+            searchView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor),
+            searchView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor),
+            searchView.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor),
+            searchView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
+        ])
     }
 }
