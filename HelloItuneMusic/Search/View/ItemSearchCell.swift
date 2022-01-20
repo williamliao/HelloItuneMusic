@@ -49,6 +49,8 @@ class ItemSearchCell: UICollectionViewCell {
         return label
     }()
     
+    private var act = UIActivityIndicatorView(style: .large)
+    
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -77,6 +79,8 @@ class ItemSearchCell: UICollectionViewCell {
 
 extension ItemSearchCell {
     func configureView() {
+        act.color = traitCollection.userInterfaceStyle == .light ? UIColor.black : UIColor.white
+        self.contentView.addSubview(act)
         self.contentView.addSubview(avatarImage)
         self.contentView.addSubview(nameLabel)
         self.contentView.addSubview(descriptionLabel)
@@ -101,7 +105,10 @@ extension ItemSearchCell {
             descriptionLabel.leadingAnchor.constraint(equalTo: avatarImage.trailingAnchor, constant: 5),
             descriptionLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -15),
             descriptionLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 5),
-            descriptionLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -5)
+            descriptionLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -5),
+            
+            act.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            act.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
         ])
     }
 }
@@ -125,6 +132,7 @@ extension ItemSearchCell {
                 loadingTask = Task {
                     do {
                         try await avatarImage.image = downloadImage(url)
+                        isLoading(isLoading: false)
                     } catch  {
                         print("downloadImage error \(error)")
                     }
@@ -142,7 +150,7 @@ extension ItemSearchCell {
         guard let imageUrl = imageUrl else {
             return nil
         }
-
+        isLoading(isLoading: true)
         let imageRequest = URLRequest(url: imageUrl)
         let (data, imageResponse) = try await URLSession.shared.data(for: imageRequest)
         guard let image = UIImage(data: data), (imageResponse as? HTTPURLResponse)?.statusCode == 200 else {
@@ -158,6 +166,15 @@ extension ItemSearchCell {
 
         let boundingBox = string.boundingRect(with: constraintRect, options: .usesLineFragmentOrigin, attributes: [NSAttributedString.Key.font : font], context: nil)
         return ceil(boundingBox.height)
+    }
+    
+    func isLoading(isLoading: Bool) {
+        if isLoading {
+            act.startAnimating()
+        } else {
+            act.stopAnimating()
+        }
+        act.isHidden = !isLoading
     }
 }
 
