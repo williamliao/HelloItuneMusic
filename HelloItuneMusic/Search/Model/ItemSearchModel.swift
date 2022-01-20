@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ItemSearchModel {
+struct ItemSearchModel: Codable {
     let resultCount: Int
     let results: [Results]
 }
@@ -59,4 +59,14 @@ struct Results: Codable {
     let shortDescription: String
     let longDescription: String
     let hasITunesExtras: Bool
+}
+
+extension Results: Hashable, Equatable {
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(artistId)
+    }
+
+    static func == (lhs: Results, rhs: Results) -> Bool {
+        return lhs.artistId == rhs.artistId
+    }
 }
