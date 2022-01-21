@@ -1,0 +1,6 @@
+framework module Pods_HelloItuneMusicTests {
+  umbrella header "Pods-HelloItuneMusicTests-umbrella.h"
+
+  export *
+  module * { export * }
+}
