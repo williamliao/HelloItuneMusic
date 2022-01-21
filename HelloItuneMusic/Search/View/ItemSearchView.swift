@@ -7,6 +7,8 @@
 
 import Foundation
 import UIKit
+import RxSwift
+import RxCocoa
 
 class ItemSearchView: UIView {
     
@@ -20,13 +22,15 @@ class ItemSearchView: UIView {
     var viewModel: ItemSearchViewModel
     var navItem: UINavigationItem
     var nameHeightDictionary: [IndexPath: CGFloat]?
+    private let disposeBag = DisposeBag()
+    
+    let showSearchItem = PublishSubject<[SearchItem]>()
     
     init(viewModel: ItemSearchViewModel, navItem: UINavigationItem) {
         self.viewModel = viewModel
         self.navItem = navItem
         super.init(frame: CGRect.zero)
         configureView()
-        configureDataSource()
         configureConstraints()
     }
  
@@ -45,8 +49,14 @@ extension ItemSearchView {
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
         collectionView.backgroundColor = .clear
         collectionView.translatesAutoresizingMaskIntoConstraints = false
-        collectionView.dataSource = self.searchDataSource
+        
+        if #available(iOS 15.0, *) {
+            collectionView.dataSource = self.searchDataSource
+            configureDataSource()
+        }
+    
         collectionView.delegate = self
+
         if #available(iOS 13.0, *) {
             collectionView.register(ItemSearchCell.self, forCellWithReuseIdentifier: ItemSearchCell.reuseIdentifier)
         }
@@ -55,12 +65,10 @@ extension ItemSearchView {
         
         searchViewController = UISearchController(searchResultsController: nil)
         searchViewController.searchBar.delegate = self
-        //searchViewController.obscuresBackgroundDuringPresentation = true
         searchViewController.definesPresentationContext = true
         searchViewController.searchBar.autocapitalizationType = .none
         searchViewController.searchBar.placeholder = "Search Iterm"
 
-        
         navItem.searchController = searchViewController
         searchViewController.hidesNavigationBarDuringPresentation = false
         navItem.hidesSearchBarWhenScrolling = false
@@ -91,11 +99,12 @@ extension ItemSearchView: UICollectionViewDelegateFlowLayout {
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
         
         let width = UIScreen.main.bounds.size.width
-        if viewModel.searchModel.results.count == 0 {
+        
+        if viewModel.subItems.count == 0 {
             return CGSize(width: width, height: 44)
         }
         
-        let res = viewModel.searchModel.results[indexPath.row]
+        let res = viewModel.subItems[indexPath.row]
         
         var baseHeight: Double = 44.0 + 26.0
         let padding: Double = 22.0
@@ -139,18 +148,9 @@ extension ItemSearchView {
        
         if #available(iOS 14.0, *) {
             
-            let configuredMainCell = UICollectionView.CellRegistration<ItemSearchCell, SearchItem> { (cell, indexPath, itemIdentifier) in
-                cell.configureCell(name: itemIdentifier.name, des: itemIdentifier.longDescription, imageUrl: itemIdentifier.artworkUrl100, previewUrl: itemIdentifier.previewUrl)
+            let configuredMainCell = UICollectionView.CellRegistration<ItemSearchCell, SearchItem> { [self] (cell, indexPath, itemIdentifier) in
                 
-                self.nameHeightDictionary?[indexPath] = cell.nameHeightConstraint.constant
-                
-                cell.playAction = { [self] in
-                    for tempCell in collectionView.visibleCells {
-                         if let specificTempCell = tempCell as? ItemSearchCell, specificTempCell != cell /* or something like this */{
-                             specificTempCell.stopPlayAfterTapOtherCell()
-                         }
-                     }
-                }
+                configureDataSource(cell: cell, itemIdentifier: itemIdentifier, index: indexPath.row)
             }
             
             searchDataSource = UICollectionViewDiffableDataSource<Section, SearchItem>(collectionView: collectionView) {
@@ -186,8 +186,8 @@ extension ItemSearchView {
         Section.allCases.forEach { snapshot.appendSections([$0]) }
         searchDataSource.apply(snapshot, animatingDifferences: false)
         
-        if  viewModel.searchItem.count > 0 {
-            snapshot.appendItems(viewModel.searchItem, toSection: .main)
+        if  viewModel.subItems.count > 0 {
+            snapshot.appendItems(viewModel.subItems, toSection: .main)
         } else {
             snapshot.appendItems([], toSection: .main)
         }
@@ -200,17 +200,58 @@ extension ItemSearchView {
 extension ItemSearchView: UISearchBarDelegate {
    
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-   
-        guard let searchText = searchBar.text else {
-            return
+
+        if #available(iOS 15.0, *) {
+            guard let searchText = searchBar.text else {
+                return
+            }
+
+            let whitespaceCharacterSet = CharacterSet.whitespaces
+            let strippedString =
+                searchText.trimmingCharacters(in: whitespaceCharacterSet)
+
+            Task {
+                try await viewModel.searchTask(term: strippedString)
+            }
+        } else {
+            let searchResults = searchBar.rx.text.orEmpty
+                        .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
+                        .distinctUntilChanged()
+            
+                        .flatMapLatest {  query -> Observable<[SearchItem]> in
+                                if query.isEmpty {
+                                    return .just([])
+                                }
+                            return self.viewModel.searchByTerm(term: query)
+                                    .catchAndReturn([])
+                            }
+                        .observe(on: MainScheduler.instance)
+            
+            searchResults
+                .bind(to: collectionView.rx.items(cellIdentifier: ItemSearchCell.reuseIdentifier)) { [self]
+                    (index, itemIdentifier: SearchItem, cell: ItemSearchCell) in
+                    
+                    configureDataSource(cell: cell, itemIdentifier: itemIdentifier, index: index)
+                    
+                }
+                .disposed(by: disposeBag)
         }
+    }
+    
+    func configureDataSource(cell: ItemSearchCell, itemIdentifier: SearchItem, index: Int) {
         
-        let whitespaceCharacterSet = CharacterSet.whitespaces
-        let strippedString =
-            searchText.trimmingCharacters(in: whitespaceCharacterSet)
+        let indexPath = IndexPath(item: index, section: 0)
         
-        Task {
-            try await viewModel.searchTask(term: strippedString)
+        cell.configureCell(name: itemIdentifier.name, des: itemIdentifier.longDescription, imageUrl: itemIdentifier.artworkUrl100, previewUrl: itemIdentifier.previewUrl)
+        
+        self.nameHeightDictionary?[indexPath] = cell.nameHeightConstraint.constant
+        
+        cell.playAction = { [self] in
+            for tempCell in collectionView.visibleCells {
+                 if let specificTempCell = tempCell as? ItemSearchCell, specificTempCell != cell{
+                     specificTempCell.stopPlayAfterTapOtherCell()
+                 }
+             }
         }
     }
     

@@ -7,6 +7,7 @@
 
 import UIKit
 import AVKit
+import RxSwift
 
 class ItemSearchCell: UICollectionViewCell {
     static var reuseIdentifier: String {
@@ -55,7 +56,6 @@ class ItemSearchCell: UICollectionViewCell {
         configuration.baseBackgroundColor = .systemGreen
         configuration.baseForegroundColor = .label
         let button = UIButton(configuration: configuration, primaryAction: nil)
-        button.addTarget(self, action: #selector(playTap), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setTitle("Play", for: UIControl.State.normal)
         return button
@@ -74,12 +74,16 @@ class ItemSearchCell: UICollectionViewCell {
     private var player:AVPlayer?
     private var dataTask: URLSessionDataTask?
     private var playUrl: String?
+    private let disposeBag = DisposeBag()
+    private var isPlaying: Bool = false
     
     var playAction: (() -> Void)?
+    var timeObserver: Any?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         configureView()
+        bindButton()
         configureConstraints()
     }
     
@@ -124,6 +128,18 @@ extension ItemSearchCell {
         self.contentView.addSubview(nameLabel)
         self.contentView.addSubview(descriptionLabel)
         self.contentView.addSubview(playButton)
+    }
+    
+    func bindButton() {
+        if #available(iOS 15.0, *) {
+            playButton.addTarget(self, action: #selector(playTap), for: .touchUpInside)
+        } else {
+            playButton.rx.tap
+                .subscribe(onNext: { [self] in
+                    playTap()
+            })
+            .disposed(by: disposeBag)
+        }
     }
     
     func configureConstraints() {
@@ -192,22 +208,20 @@ extension ItemSearchCell {
                 guard let url = url else {
                     return
                 }
+                
+                URLSession.shared.rx.data(request: URLRequest(url: url))
+                    .subscribe(onNext: { data in
+                      
+                        let image = UIImage(data: data)
 
-                let dataTask = URLSession.shared.dataTask(with: url) { (data, _, _) in
-                    guard let data = data else {
-                        return
-                    }
-
-                    let image = UIImage(data: data)
-
-                    DispatchQueue.main.async { [weak self] in
-                        self?.isLoading(isLoading: false)
-                        self?.avatarImage.image = image
-                    }
-                }
-
-                dataTask.resume()
-                self.dataTask = dataTask
+                        DispatchQueue.main.async { [weak self] in
+                            self?.isLoading(isLoading: false)
+                            self?.avatarImage.image = image
+                        }
+                    }, onError: { error in
+                        print("Data Task Error: \(error)")
+                    })
+                    .disposed(by: disposeBag)
             }
             
         }
@@ -250,7 +264,7 @@ extension ItemSearchCell {
 extension ItemSearchCell {
     @objc private func playTap() {
         playAction?()
-        
+     
         if let url = playUrl, let previewUrl = URL(string: url) {
             
             playerItem = AVPlayerItem(url: previewUrl)
@@ -260,16 +274,27 @@ extension ItemSearchCell {
             addPeriodicTimeObserver()
         }
         
-        if let playingPlayer = player {
-            playingPlayer.pause()
+        if isPlaying == true {
+            player?.pause()
+            
+            if let timeObserver = self.timeObserver {
+                self.player?.removeTimeObserver(timeObserver)
+                
+            }
+            playButton.setTitle("Play", for: UIControl.State.normal)
+            progressBarView.progress = 0
+            isPlaying = false
+            return
         }
         
         if player?.rate == 0 {
+            isPlaying = true
             player?.play()
             playButton.setTitle("Pause", for: UIControl.State.normal)
         } else {
             player?.pause()
             playButton.setTitle("Play", for: UIControl.State.normal)
+            isPlaying = false
         }
     }
     
@@ -284,7 +309,7 @@ extension ItemSearchCell {
         let interval = CMTime(seconds: 0.5,
                               preferredTimescale: CMTimeScale(NSEC_PER_SEC))
         let mainQueue = DispatchQueue.main
-        self.player?.addPeriodicTimeObserver(forInterval: interval, queue: mainQueue) { [weak self] time in
+        self.timeObserver = self.player?.addPeriodicTimeObserver(forInterval: interval, queue: mainQueue) { [weak self] time in
             let currentSeconds = CMTimeGetSeconds(time)
             guard let duration = self?.playerItem?.duration else { return }
             let totalSeconds = CMTimeGetSeconds(duration)

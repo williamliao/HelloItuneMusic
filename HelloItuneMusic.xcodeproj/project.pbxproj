@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		141B5796BA321E780C2AC4E9 /* Pods_HelloItuneMusic_HelloItuneMusicUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 603DB81A8DF4898FD84FA5E9 /* Pods_HelloItuneMusic_HelloItuneMusicUITests.framework */; };
+		3BBC7E40564509A544530E50 /* Pods_HelloItuneMusic.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6F5EE11627332F49BA857B3 /* Pods_HelloItuneMusic.framework */; };
+		86AB50B7C6432AEC81E2C82A /* Pods_HelloItuneMusicTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5149E71C6D098C891B78F723 /* Pods_HelloItuneMusicTests.framework */; };
 		C81286BC2799251200586D33 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C81286BB2799251200586D33 /* AppDelegate.swift */; };
 		C81286BE2799251200586D33 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C81286BD2799251200586D33 /* SceneDelegate.swift */; };
 		C81286C32799251200586D33 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C81286C12799251200586D33 /* Main.storyboard */; };
@@ -42,6 +45,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		33DFEBB2120EF881C90BF1D9 /* Pods-HelloItuneMusicTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HelloItuneMusicTests.debug.xcconfig"; path = "Target Support Files/Pods-HelloItuneMusicTests/Pods-HelloItuneMusicTests.debug.xcconfig"; sourceTree = "<group>"; };
+		5149E71C6D098C891B78F723 /* Pods_HelloItuneMusicTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_HelloItuneMusicTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		56D23613FADD0EBFE15D6729 /* Pods-HelloItuneMusic-HelloItuneMusicUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HelloItuneMusic-HelloItuneMusicUITests.debug.xcconfig"; path = "Target Support Files/Pods-HelloItuneMusic-HelloItuneMusicUITests/Pods-HelloItuneMusic-HelloItuneMusicUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		603DB81A8DF4898FD84FA5E9 /* Pods_HelloItuneMusic_HelloItuneMusicUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_HelloItuneMusic_HelloItuneMusicUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		6350766D1BF6A3011913A69F /* Pods-HelloItuneMusicTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HelloItuneMusicTests.release.xcconfig"; path = "Target Support Files/Pods-HelloItuneMusicTests/Pods-HelloItuneMusicTests.release.xcconfig"; sourceTree = "<group>"; };
+		79C8A29D4422012778EA4AEF /* Pods-HelloItuneMusic.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HelloItuneMusic.debug.xcconfig"; path = "Target Support Files/Pods-HelloItuneMusic/Pods-HelloItuneMusic.debug.xcconfig"; sourceTree = "<group>"; };
 		C81286B82799251200586D33 /* HelloItuneMusic.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HelloItuneMusic.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C81286BB2799251200586D33 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		C81286BD2799251200586D33 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -61,6 +70,9 @@
 		C81286FA2799287200586D33 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		C81286FC2799293B00586D33 /* EndPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndPoint.swift; sourceTree = "<group>"; };
 		C812870027992EA600586D33 /* ItemSearchCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemSearchCell.swift; sourceTree = "<group>"; };
+		CDBC26B841319C16563E79E4 /* Pods-HelloItuneMusic-HelloItuneMusicUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HelloItuneMusic-HelloItuneMusicUITests.release.xcconfig"; path = "Target Support Files/Pods-HelloItuneMusic-HelloItuneMusicUITests/Pods-HelloItuneMusic-HelloItuneMusicUITests.release.xcconfig"; sourceTree = "<group>"; };
+		D6F5EE11627332F49BA857B3 /* Pods_HelloItuneMusic.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_HelloItuneMusic.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		FBF2AA2499E50A5A588F84AE /* Pods-HelloItuneMusic.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HelloItuneMusic.release.xcconfig"; path = "Target Support Files/Pods-HelloItuneMusic/Pods-HelloItuneMusic.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,6 +80,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3BBC7E40564509A544530E50 /* Pods_HelloItuneMusic.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -75,6 +88,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				86AB50B7C6432AEC81E2C82A /* Pods_HelloItuneMusicTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -82,12 +96,27 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				141B5796BA321E780C2AC4E9 /* Pods_HelloItuneMusic_HelloItuneMusicUITests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		434696C4B3A55FD2CE1B6AB3 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				79C8A29D4422012778EA4AEF /* Pods-HelloItuneMusic.debug.xcconfig */,
+				FBF2AA2499E50A5A588F84AE /* Pods-HelloItuneMusic.release.xcconfig */,
+				56D23613FADD0EBFE15D6729 /* Pods-HelloItuneMusic-HelloItuneMusicUITests.debug.xcconfig */,
+				CDBC26B841319C16563E79E4 /* Pods-HelloItuneMusic-HelloItuneMusicUITests.release.xcconfig */,
+				33DFEBB2120EF881C90BF1D9 /* Pods-HelloItuneMusicTests.debug.xcconfig */,
+				6350766D1BF6A3011913A69F /* Pods-HelloItuneMusicTests.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		C81286AF2799251200586D33 = {
 			isa = PBXGroup;
 			children = (
@@ -95,6 +124,8 @@
 				C81286D12799251400586D33 /* HelloItuneMusicTests */,
 				C81286DB2799251400586D33 /* HelloItuneMusicUITests */,
 				C81286B92799251200586D33 /* Products */,
+				434696C4B3A55FD2CE1B6AB3 /* Pods */,
+				F99198F825340ACE56731058 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -185,6 +216,16 @@
 			path = Service;
 			sourceTree = "<group>";
 		};
+		F99198F825340ACE56731058 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D6F5EE11627332F49BA857B3 /* Pods_HelloItuneMusic.framework */,
+				603DB81A8DF4898FD84FA5E9 /* Pods_HelloItuneMusic_HelloItuneMusicUITests.framework */,
+				5149E71C6D098C891B78F723 /* Pods_HelloItuneMusicTests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -192,9 +233,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = C81286E22799251400586D33 /* Build configuration list for PBXNativeTarget "HelloItuneMusic" */;
 			buildPhases = (
+				BC7972330BC1C2C0006E8073 /* [CP] Check Pods Manifest.lock */,
 				C81286B42799251200586D33 /* Sources */,
 				C81286B52799251200586D33 /* Frameworks */,
 				C81286B62799251200586D33 /* Resources */,
+				B18CB76796ECB9161701A7C1 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -209,6 +252,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = C81286E52799251400586D33 /* Build configuration list for PBXNativeTarget "HelloItuneMusicTests" */;
 			buildPhases = (
+				94A11563362CCCEC04C695C2 /* [CP] Check Pods Manifest.lock */,
 				C81286CA2799251400586D33 /* Sources */,
 				C81286CB2799251400586D33 /* Frameworks */,
 				C81286CC2799251400586D33 /* Resources */,
@@ -227,9 +271,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = C81286E82799251400586D33 /* Build configuration list for PBXNativeTarget "HelloItuneMusicUITests" */;
 			buildPhases = (
+				8EF56DF0CB0D11ED6E7D0FEF /* [CP] Check Pods Manifest.lock */,
 				C81286D42799251400586D33 /* Sources */,
 				C81286D52799251400586D33 /* Frameworks */,
 				C81286D62799251400586D33 /* Resources */,
+				7C89E3A56FB08043EAAA14E3 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -310,6 +356,109 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		7C89E3A56FB08043EAAA14E3 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-HelloItuneMusic-HelloItuneMusicUITests/Pods-HelloItuneMusic-HelloItuneMusicUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-HelloItuneMusic-HelloItuneMusicUITests/Pods-HelloItuneMusic-HelloItuneMusicUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-HelloItuneMusic-HelloItuneMusicUITests/Pods-HelloItuneMusic-HelloItuneMusicUITests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		8EF56DF0CB0D11ED6E7D0FEF /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-HelloItuneMusic-HelloItuneMusicUITests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		94A11563362CCCEC04C695C2 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-HelloItuneMusicTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		B18CB76796ECB9161701A7C1 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-HelloItuneMusic/Pods-HelloItuneMusic-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-HelloItuneMusic/Pods-HelloItuneMusic-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-HelloItuneMusic/Pods-HelloItuneMusic-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		BC7972330BC1C2C0006E8073 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-HelloItuneMusic-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		C81286B42799251200586D33 /* Sources */ = {
@@ -498,6 +647,7 @@
 		};
 		C81286E32799251400586D33 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 79C8A29D4422012778EA4AEF /* Pods-HelloItuneMusic.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -526,6 +676,7 @@
 		};
 		C81286E42799251400586D33 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = FBF2AA2499E50A5A588F84AE /* Pods-HelloItuneMusic.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -554,6 +705,7 @@
 		};
 		C81286E62799251400586D33 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 33DFEBB2120EF881C90BF1D9 /* Pods-HelloItuneMusicTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -574,6 +726,7 @@
 		};
 		C81286E72799251400586D33 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 6350766D1BF6A3011913A69F /* Pods-HelloItuneMusicTests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -594,6 +747,7 @@
 		};
 		C81286E92799251400586D33 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 56D23613FADD0EBFE15D6729 /* Pods-HelloItuneMusic-HelloItuneMusicUITests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -612,6 +766,7 @@
 		};
 		C81286EA2799251400586D33 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CDBC26B841319C16563E79E4 /* Pods-HelloItuneMusic-HelloItuneMusicUITests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
