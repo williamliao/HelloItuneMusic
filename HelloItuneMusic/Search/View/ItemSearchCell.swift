@@ -112,6 +112,10 @@ class ItemSearchCell: UICollectionViewCell {
             dataTask?.cancel()
             dataTask = nil
         }
+        
+        if let timeObserver = self.timeObserver {
+            self.player?.removeTimeObserver(timeObserver)
+        }
     }
     
     override func layoutSubviews() {
@@ -288,7 +292,6 @@ extension ItemSearchCell {
             
             if let timeObserver = self.timeObserver {
                 self.player?.removeTimeObserver(timeObserver)
-                
             }
             playButton.setTitle("Play", for: UIControl.State.normal)
             progressBarView.progress = 0
