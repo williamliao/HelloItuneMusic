@@ -7,11 +7,27 @@
 
 import Foundation
 import RxSwift
+import RxCocoa
 
 enum ItemSearchCellType {
-    case normal
+    case normal(item: SearchItem)
     case error(message: String)
     case empty
+}
+
+extension ItemSearchCellType: Hashable {
+
+    func hash(into hasher: inout Hasher) {
+
+        switch self {
+        case .normal(let value):
+            hasher.combine(value)
+        case .error(let value):
+            hasher.combine(value)
+        case .empty:
+            break
+        }
+    }
 }
 
 class ItemSearchViewModel {
@@ -25,8 +41,10 @@ class ItemSearchViewModel {
     var subItems : [SearchItem] = []
     let urlSession: URLSession
     
-    let onShowError: PublishSubject<NetworkError> = PublishSubject()
-    let searchItem: PublishSubject<[SearchItem]> = PublishSubject()
+    let cells = BehaviorRelay<[ItemSearchCellType]>(value: [])
+    var searchItemCells: Observable<[ItemSearchCellType]> {
+        return cells.asObservable()
+    }
 
     init(apiClient: APIClient, urlSession: URLSession = .shared) {
         self.apiClient = apiClient
@@ -52,8 +70,8 @@ extension ItemSearchViewModel {
                 case .success(let responseObject):
 
                     if responseObject.results.count == 0 {
-                        onShowError.onNext( NetworkError.notFound )
-                        onShowError.onCompleted()
+                        cells.accept([.empty])
+
                         return
                     }
 
@@ -62,19 +80,18 @@ extension ItemSearchViewModel {
                         subItems.append(item)
                     }
                 
-                    searchItem.onNext( subItems )
-                    searchItem.onCompleted()
-                
+                    cells.accept(responseObject.results.compactMap {
+                      
+                        .normal(item: SearchItem(id: UUID() ,name: $0.trackName, longDescription: $0.longDescription, artworkUrl100: $0.artworkUrl100, previewUrl: $0.previewUrl))
+                        
+                    })
+               
                 case .failure(let error):
-                    print("searchTask \(error)")
-                    onShowError.onNext( error )
-                    onShowError.onCompleted()
+                    cells.accept([.error( message: (error.localizedDescription))])
             }
             
         }  catch  {
-            print("searchTask error \(error)")
-            onShowError.onNext( error as? NetworkError ?? NetworkError.unKnown )
-            onShowError.onCompleted()
+            cells.accept([.error( message: (error.localizedDescription))])
         }
         
     }
@@ -92,24 +109,25 @@ extension ItemSearchViewModel {
                   
                     do {
                         let responseObject = try decoder.decode(ItemSearchModel.self, from: data)
-                        
-                        responseObject.results.forEach { result in
-                            let item = SearchItem(id: UUID() ,name: result.trackName, longDescription: result.longDescription, artworkUrl100: result.artworkUrl100, previewUrl: result.previewUrl)
-                            subItems.append(item)
+
+                        if responseObject.results.count == 0 {
+                            cells.accept([.empty])
+
+                            return
                         }
                         
-                        observer.onNext( subItems )
-                        observer.onCompleted()
+                        cells.accept(responseObject.results.compactMap {
+                          
+                            .normal(item: SearchItem(id: UUID() ,name: $0.trackName, longDescription: $0.longDescription, artworkUrl100: $0.artworkUrl100, previewUrl: $0.previewUrl))
+                            
+                        })
                         
                     } catch  {
-                        print("error \(error)")
-                        onShowError.onNext( error as? NetworkError ?? NetworkError.unKnown )
-                        onShowError.onCompleted()
+                        cells.accept([.error( message: (error.localizedDescription))])
                     }
  
                 }, onError: { error in
-                    onShowError.onNext( error as? NetworkError ?? NetworkError.unKnown )
-                    onShowError.onCompleted()
+                    cells.accept([.error( message: (error.localizedDescription))])
                 })
                 .disposed(by: disposeBag)
             

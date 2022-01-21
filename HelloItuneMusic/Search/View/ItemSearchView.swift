@@ -30,14 +30,13 @@ class ItemSearchView: UIView {
         super.init(frame: CGRect.zero)
         configureView()
         configureConstraints()
-        bindSearchError()
     }
  
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private var searchDataSource: UICollectionViewDiffableDataSource<Section, SearchItem>!
+    private var searchDataSource: UICollectionViewDiffableDataSource<Section, ItemSearchCellType>!
 }
 
 // MARK: - View
@@ -60,7 +59,7 @@ extension ItemSearchView {
         if #available(iOS 13.0, *) {
             collectionView.register(ItemSearchCell.self, forCellWithReuseIdentifier: ItemSearchCell.reuseIdentifier)
         }
-        
+       
         self.addSubview(collectionView)
         
         searchViewController = UISearchController(searchResultsController: nil)
@@ -93,18 +92,17 @@ extension ItemSearchView: UICollectionViewDelegateFlowLayout {
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
         
         let width = UIScreen.main.bounds.size.width
-        
-        if viewModel.subItems.count == 0 {
-            return CGSize(width: width, height: 44)
-        }
-        
-        let res = viewModel.subItems[indexPath.row]
-        
         var baseHeight: Double = 44.0 + 26.0
         let padding: Double = 22.0
         if let nameHeight = nameHeightDictionary?[indexPath] {
             baseHeight = baseHeight + nameHeight
         }
+        
+        if viewModel.subItems.count == 0 {
+            return CGSize(width: width, height: baseHeight)
+        }
+        
+        let res = viewModel.subItems[indexPath.row]
         
         if let longDescription = res.longDescription {
             
@@ -140,22 +138,30 @@ extension ItemSearchView: UICollectionViewDelegateFlowLayout {
 extension ItemSearchView {
     func configureDataSource() {
        
-        if #available(iOS 14.0, *) {
+        if #available(iOS 15.0, *) {
             
-            let configuredMainCell = UICollectionView.CellRegistration<ItemSearchCell, SearchItem> { [self] (cell, indexPath, itemIdentifier) in
+            let configuredMainCell = UICollectionView.CellRegistration<ItemSearchCell, ItemSearchCellType> { [self] (cell, indexPath, itemIdentifier) in
                 
-                configureDataSource(cell: cell, itemIdentifier: itemIdentifier, index: indexPath.row)
+                switch itemIdentifier {
+                    case .normal( let item):
+                        configureDataSource(cell: cell, itemIdentifier: item, index: indexPath.row)
+                        break
+                    case .error(let message):
+                        cell.nameLabel.text = message
+                    case .empty:
+                        cell.nameLabel.text = "NO Data Avaliable"
+                }
             }
             
-            searchDataSource = UICollectionViewDiffableDataSource<Section, SearchItem>(collectionView: collectionView) {
-                (collectionView: UICollectionView, indexPath: IndexPath, identifier: SearchItem) -> ItemSearchCell? in
+            searchDataSource = UICollectionViewDiffableDataSource<Section, ItemSearchCellType>(collectionView: collectionView) {
+                (collectionView: UICollectionView, indexPath: IndexPath, identifier: ItemSearchCellType) -> ItemSearchCell? in
                 return collectionView.dequeueConfiguredReusableCell(using: configuredMainCell, for: indexPath, item: identifier)
             }
             
         } else {
             // Fallback on earlier versions
-            searchDataSource = UICollectionViewDiffableDataSource<Section, SearchItem>(collectionView: collectionView) {
-                (collectionView: UICollectionView, indexPath: IndexPath, identifier: SearchItem) -> UICollectionViewCell? in
+            searchDataSource = UICollectionViewDiffableDataSource<Section, ItemSearchCellType>(collectionView: collectionView) {
+                (collectionView: UICollectionView, indexPath: IndexPath, identifier: ItemSearchCellType) -> UICollectionViewCell? in
                 return collectionView.dequeueReusableCell(withReuseIdentifier: ItemSearchCell.reuseIdentifier, for: indexPath)
             }
         }
@@ -174,18 +180,26 @@ extension ItemSearchView {
     
     func configureSearchItem() {
        
-        var snapshot = NSDiffableDataSourceSnapshot<Section, SearchItem>()
+        var snapshot = NSDiffableDataSourceSnapshot<Section, ItemSearchCellType>()
  
         Section.allCases.forEach { snapshot.appendSections([$0]) }
         searchDataSource.apply(snapshot, animatingDifferences: false)
+
+        let cells: Observable<[ItemSearchCellType]> = viewModel.cells
+            .flatMap { Observable.from($0).map { $0 }.toArray() }
         
-        if  viewModel.subItems.count > 0 {
-            snapshot.appendItems(viewModel.subItems, toSection: .main)
-        } else {
-            snapshot.appendItems([], toSection: .main)
+        cells
+        .observe(on: MainScheduler.instance)
+        .subscribe { [self] items in
+            
+            guard let cell = items.element else {
+                return
+            }
+            snapshot.appendItems(cell, toSection: .main)
+            searchDataSource.apply(snapshot, animatingDifferences: false)
+            
         }
-        
-        searchDataSource.apply(snapshot, animatingDifferences: false)
+        .disposed(by: disposeBag)
     }
 }
 
@@ -193,41 +207,21 @@ extension ItemSearchView {
 extension ItemSearchView: UISearchBarDelegate {
    
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        
+        guard let searchText = searchBar.text else {
+            return
+        }
+
+        let whitespaceCharacterSet = CharacterSet.whitespaces
+        let strippedString =
+            searchText.trimmingCharacters(in: whitespaceCharacterSet)
 
         if #available(iOS 15.0, *) {
-            guard let searchText = searchBar.text else {
-                return
-            }
-
-            let whitespaceCharacterSet = CharacterSet.whitespaces
-            let strippedString =
-                searchText.trimmingCharacters(in: whitespaceCharacterSet)
-
             Task {
                 try await viewModel.searchTask(term: strippedString)
             }
         } else {
-            let searchResults = searchBar.rx.text.orEmpty
-                        .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
-                        .distinctUntilChanged()
-            
-                        .flatMapLatest {  query -> Observable<[SearchItem]> in
-                                if query.isEmpty {
-                                    return .just([])
-                                }
-                            return self.viewModel.searchByTerm(term: query)
-                                    .catchAndReturn([])
-                            }
-                        .observe(on: MainScheduler.instance)
-            
-            searchResults
-                .bind(to: collectionView.rx.items(cellIdentifier: ItemSearchCell.reuseIdentifier)) { [self]
-                    (index, itemIdentifier: SearchItem, cell: ItemSearchCell) in
-                    
-                    configureDataSource(cell: cell, itemIdentifier: itemIdentifier, index: index)
-                    
-                }
-                .disposed(by: disposeBag)
+            let _ = viewModel.searchByTerm(term: strippedString)
         }
     }
     
@@ -250,31 +244,36 @@ extension ItemSearchView: UISearchBarDelegate {
 extension ItemSearchView {
     func bindSearchItem() {
         
-        viewModel.searchItem
-            .observe(on: MainScheduler.instance)
-            .subscribe { [self] elements in
-                DispatchQueue.main.async {
-                    applyInitialSnapshots()
+        if #available(iOS 15.0, *) {
+            viewModel.searchItemCells
+                .observe(on: MainScheduler.instance)
+                .subscribe { [self] elements in
+                    DispatchQueue.main.async {
+                        applyInitialSnapshots()
+                    }
                 }
-            }
-            .disposed(by: disposeBag)
-    }
-    
-    func bindSearchError() {
-        viewModel.onShowError
-            .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { (error) in
-           
-                switch error {
-                    case .timeOut:
-                        self.showAlert(message: "Server TimeOut")
-                    case .notFound:
-                        self.showAlert(message: "Search Keyword notFound")
-                    default:
-                        self.showAlert(message: error.localizedDescription)
+                .disposed(by: disposeBag)
+        } else {
+            viewModel.searchItemCells
+                .bind(to: collectionView.rx.items(
+                    cellIdentifier: ItemSearchCell.reuseIdentifier,
+                    cellType: ItemSearchCell.self
+                )) { [self] row, element, cell in
+
+                    switch element {
+                    case .normal(let itemIdentifier):
+
+                        configureDataSource(cell: cell, itemIdentifier: itemIdentifier, index: row)
+
+                        break
+                    case .error(let message):
+                        cell.nameLabel.text = message
+                    case .empty:
+                        cell.nameLabel.text = "No data available"
+                    }
                 }
-        })
-        .disposed(by: disposeBag)
+                .disposed(by: disposeBag)
+        }
     }
 }
 
@@ -295,23 +294,6 @@ extension ItemSearchView {
                      specificTempCell.stopPlayAfterTapOtherCell()
                  }
              }
-        }
-    }
-    
-    func showAlert(message: String) {
-        
-        DispatchQueue.main.async {
-            
-            guard let presentVC = UIApplication.shared.keyWindowPresentedController else {
-                return
-            }
-            
-            let alertController = UIAlertController(title: NSLocalizedString("Attention", comment: ""), message: message, preferredStyle: .alert)
-     
-            alertController.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: .default) { action in
-                
-            })
-            presentVC.present(alertController, animated: true, completion: nil)
         }
     }
 }
