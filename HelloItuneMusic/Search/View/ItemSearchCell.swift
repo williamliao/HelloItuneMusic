@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import AVKit
 
 class ItemSearchCell: UICollectionViewCell {
     static var reuseIdentifier: String {
@@ -14,7 +15,7 @@ class ItemSearchCell: UICollectionViewCell {
     
     private var isHeightCalculated: Bool = false
     private var loadingTask: Task<Void, Never>?
-    private var nameHeightConstraint: NSLayoutConstraint!
+    var nameHeightConstraint: NSLayoutConstraint!
     
     let avatarImage: UIImageView = {
         let imageView = UIImageView()
@@ -49,8 +50,32 @@ class ItemSearchCell: UICollectionViewCell {
         return label
     }()
     
-    private var act = UIActivityIndicatorView(style: .large)
+    let playButton: UIButton = {
+        var configuration = UIButton.Configuration.tinted()
+        configuration.baseBackgroundColor = .systemGreen
+        configuration.baseForegroundColor = .label
+        let button = UIButton(configuration: configuration, primaryAction: nil)
+        button.addTarget(self, action: #selector(playTap), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setTitle("Play", for: UIControl.State.normal)
+        return button
+    }()
+  
+    let progressBarView: UIProgressView = {
+        let progressView = UIProgressView()
+        progressView.progress = 0
+        progressView.progressTintColor = UIColor.systemBlue.withAlphaComponent(0.5)
+        progressView.translatesAutoresizingMaskIntoConstraints = false
+        return progressView
+    }()
     
+    private var act = UIActivityIndicatorView(style: .large)
+    private var playerItem:AVPlayerItem?
+    private var player:AVPlayer?
+    private var dataTask: URLSessionDataTask?
+    private var playUrl: String?
+    
+    var playAction: (() -> Void)?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -67,8 +92,21 @@ class ItemSearchCell: UICollectionViewCell {
         avatarImage.image = UIImage(systemName: "person.crop.circle")
         nameLabel.text = ""
         descriptionLabel.text = ""
-        loadingTask?.cancel()
-        loadingTask = nil
+        progressBarView.progress = 0
+        isLoading(isLoading: false)
+        
+        player = nil
+        playerItem = nil
+        playUrl = ""
+        playButton.setTitle("Play", for: UIControl.State.normal)
+        
+        if #available(iOS 15.0, *) {
+            loadingTask?.cancel()
+            loadingTask = nil
+        } else {
+            dataTask?.cancel()
+            dataTask = nil
+        }
     }
     
     override func layoutSubviews() {
@@ -80,10 +118,12 @@ class ItemSearchCell: UICollectionViewCell {
 extension ItemSearchCell {
     func configureView() {
         act.color = traitCollection.userInterfaceStyle == .light ? UIColor.black : UIColor.white
+        self.contentView.addSubview(progressBarView)
         self.contentView.addSubview(act)
         self.contentView.addSubview(avatarImage)
         self.contentView.addSubview(nameLabel)
         self.contentView.addSubview(descriptionLabel)
+        self.contentView.addSubview(playButton)
     }
     
     func configureConstraints() {
@@ -91,6 +131,11 @@ extension ItemSearchCell {
         nameHeightConstraint = nameLabel.heightAnchor.constraint(equalToConstant: 16)
        
         NSLayoutConstraint.activate([
+            
+            progressBarView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            progressBarView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            progressBarView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            progressBarView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             
             avatarImage.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 15),
             avatarImage.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 10),
@@ -101,10 +146,15 @@ extension ItemSearchCell {
             nameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -15),
             nameLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 10),
             nameHeightConstraint,
-            
+
+            playButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -15),
+            playButton.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 5),
+            playButton.heightAnchor.constraint(equalToConstant: 26),
+            playButton.widthAnchor.constraint(equalToConstant: 100),
+     
             descriptionLabel.leadingAnchor.constraint(equalTo: avatarImage.trailingAnchor, constant: 5),
             descriptionLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -15),
-            descriptionLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 5),
+            descriptionLabel.topAnchor.constraint(equalTo: playButton.bottomAnchor, constant: 5),
             descriptionLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -5),
             
             act.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
@@ -114,21 +164,20 @@ extension ItemSearchCell {
 }
 
 extension ItemSearchCell {
-    func configureCell(name: String?, des: String?, imageUrl: String?) {
+    func configureCell(name: String?, des: String?, imageUrl: String?, previewUrl: String?) {
         
         descriptionLabel.text = des
-        
+        playUrl = previewUrl
+    
         if let name = name {
             let height = self.height(withString: name, font: nameLabel.font)
             nameHeightConstraint.constant = height
             nameLabel.text = name
         }
         
-        
-        if #available(iOS 15.0, *) {
-            if let imageUrl = imageUrl {
-                
-                let url = URL(string: imageUrl)
+        if let imageUrl = imageUrl {
+            let url = URL(string: imageUrl)
+            if #available(iOS 15.0, *) {
                 loadingTask = Task {
                     do {
                         try await avatarImage.image = downloadImage(url)
@@ -137,10 +186,30 @@ extension ItemSearchCell {
                         print("downloadImage error \(error)")
                     }
                 }
+            } else {
+                isLoading(isLoading: true)
                 
+                guard let url = url else {
+                    return
+                }
+
+                let dataTask = URLSession.shared.dataTask(with: url) { (data, _, _) in
+                    guard let data = data else {
+                        return
+                    }
+
+                    let image = UIImage(data: data)
+
+                    DispatchQueue.main.async { [weak self] in
+                        self?.isLoading(isLoading: false)
+                        self?.avatarImage.image = image
+                    }
+                }
+
+                dataTask.resume()
+                self.dataTask = dataTask
             }
-        } else {
-            // Fallback on earlier versions
+            
         }
     }
     
@@ -175,6 +244,53 @@ extension ItemSearchCell {
             act.stopAnimating()
         }
         act.isHidden = !isLoading
+    }
+}
+
+extension ItemSearchCell {
+    @objc private func playTap() {
+        playAction?()
+        
+        if let url = playUrl, let previewUrl = URL(string: url) {
+            
+            playerItem = AVPlayerItem(url: previewUrl)
+            player = AVPlayer(playerItem: playerItem)
+            player?.volume = 0.5
+            
+            addPeriodicTimeObserver()
+        }
+        
+        if let playingPlayer = player {
+            playingPlayer.pause()
+        }
+        
+        if player?.rate == 0 {
+            player?.play()
+            playButton.setTitle("Pause", for: UIControl.State.normal)
+        } else {
+            player?.pause()
+            playButton.setTitle("Play", for: UIControl.State.normal)
+        }
+    }
+    
+    func stopPlayAfterTapOtherCell() {
+        player?.pause()
+        playButton.setTitle("Play", for: UIControl.State.normal)
+        progressBarView.progress = 0
+    }
+
+    private func addPeriodicTimeObserver() {
+        
+        let interval = CMTime(seconds: 0.5,
+                              preferredTimescale: CMTimeScale(NSEC_PER_SEC))
+        let mainQueue = DispatchQueue.main
+        self.player?.addPeriodicTimeObserver(forInterval: interval, queue: mainQueue) { [weak self] time in
+            let currentSeconds = CMTimeGetSeconds(time)
+            guard let duration = self?.playerItem?.duration else { return }
+            let totalSeconds = CMTimeGetSeconds(duration)
+            let progress: Float = Float(currentSeconds/totalSeconds)
+            self?.progressBarView.progress = progress
+        }
     }
 }
 

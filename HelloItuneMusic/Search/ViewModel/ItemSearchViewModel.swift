@@ -41,7 +41,7 @@ extension ItemSearchViewModel {
                     searchModel = responseObject
 
                 searchModel.results.forEach { result in
-                    let item = SearchItem(id: UUID() ,name: result.trackName, longDescription: result.longDescription, artworkUrl100: result.artworkUrl100)
+                    let item = SearchItem(id: UUID() ,name: result.trackName, longDescription: result.longDescription, artworkUrl100: result.artworkUrl100, previewUrl: result.previewUrl)
                     searchItem.append(item)
                 }
                 

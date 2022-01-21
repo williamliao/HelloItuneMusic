@@ -12,6 +12,7 @@ struct SearchItem: Codable {
     let name: String?
     let longDescription: String?
     let artworkUrl100: String?
+    let previewUrl: String?
 }
 
 extension SearchItem: Hashable, Equatable {

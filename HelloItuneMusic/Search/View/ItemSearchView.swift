@@ -19,6 +19,7 @@ class ItemSearchView: UIView {
     
     var viewModel: ItemSearchViewModel
     var navItem: UINavigationItem
+    var nameHeightDictionary: [IndexPath: CGFloat]?
     
     init(viewModel: ItemSearchViewModel, navItem: UINavigationItem) {
         self.viewModel = viewModel
@@ -54,10 +55,9 @@ extension ItemSearchView {
         
         searchViewController = UISearchController(searchResultsController: nil)
         searchViewController.searchBar.delegate = self
-        searchViewController.obscuresBackgroundDuringPresentation = true
+        //searchViewController.obscuresBackgroundDuringPresentation = true
         searchViewController.definesPresentationContext = true
         searchViewController.searchBar.autocapitalizationType = .none
-        searchViewController.obscuresBackgroundDuringPresentation = true
         searchViewController.searchBar.placeholder = "Search Iterm"
 
         
@@ -97,14 +97,20 @@ extension ItemSearchView: UICollectionViewDelegateFlowLayout {
         
         let res = viewModel.searchModel.results[indexPath.row]
         
+        var baseHeight: Double = 44.0 + 26.0
+        let padding: Double = 22.0
+        if let nameHeight = nameHeightDictionary?[indexPath] {
+            baseHeight = baseHeight + nameHeight
+        }
+        
         if let longDescription = res.longDescription {
             
             let constraintRect = CGSize(width: width, height: .greatestFiniteMagnitude)
             let boundingBox = longDescription.boundingRect(with: constraintRect, options: .usesLineFragmentOrigin, attributes: [NSAttributedString.Key.font : UIFont.systemFont(ofSize: 16)], context: nil)
             
-            return CGSize(width: width, height: 44 + ceil(boundingBox.height))
+            return CGSize(width: width, height: baseHeight + ceil(boundingBox.height) + padding)
         } else {
-            return CGSize(width: width, height: 44)
+            return CGSize(width: width, height: baseHeight + padding)
         }
     }
     
@@ -134,7 +140,17 @@ extension ItemSearchView {
         if #available(iOS 14.0, *) {
             
             let configuredMainCell = UICollectionView.CellRegistration<ItemSearchCell, SearchItem> { (cell, indexPath, itemIdentifier) in
-                cell.configureCell(name: itemIdentifier.name, des: itemIdentifier.longDescription, imageUrl: itemIdentifier.artworkUrl100)
+                cell.configureCell(name: itemIdentifier.name, des: itemIdentifier.longDescription, imageUrl: itemIdentifier.artworkUrl100, previewUrl: itemIdentifier.previewUrl)
+                
+                self.nameHeightDictionary?[indexPath] = cell.nameHeightConstraint.constant
+                
+                cell.playAction = { [self] in
+                    for tempCell in collectionView.visibleCells {
+                         if let specificTempCell = tempCell as? ItemSearchCell, specificTempCell != cell /* or something like this */{
+                             specificTempCell.stopPlayAfterTapOtherCell()
+                         }
+                     }
+                }
             }
             
             searchDataSource = UICollectionViewDiffableDataSource<Section, SearchItem>(collectionView: collectionView) {
