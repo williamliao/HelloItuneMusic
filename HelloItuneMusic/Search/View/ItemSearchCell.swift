@@ -69,12 +69,13 @@ class ItemSearchCell: UICollectionViewCell {
         return progressView
     }()
     
-    private var act = UIActivityIndicatorView(style: .large)
+    var act = UIActivityIndicatorView(style: .large)
     private var playerItem:AVPlayerItem?
     private var player:AVPlayer?
     private var dataTask: URLSessionDataTask?
     private var playUrl: String?
     private let disposeBag = DisposeBag()
+    private let loadInProgress: PublishSubject<Bool> = PublishSubject<Bool>()
     private var isPlaying: Bool = false
     
     var playAction: (() -> Void)?
@@ -128,6 +129,8 @@ extension ItemSearchCell {
         self.contentView.addSubview(nameLabel)
         self.contentView.addSubview(descriptionLabel)
         self.contentView.addSubview(playButton)
+        
+        loadInProgress.bind(to: act.rx.isAnimating).disposed(by: disposeBag)
     }
     
     func bindButton() {
@@ -252,11 +255,17 @@ extension ItemSearchCell {
     }
     
     func isLoading(isLoading: Bool) {
-        if isLoading {
-            act.startAnimating()
+        
+        if #available(iOS 15.0, *)  {
+            if isLoading {
+                act.startAnimating()
+            } else {
+                act.stopAnimating()
+            }
         } else {
-            act.stopAnimating()
+            loadInProgress.onNext(isLoading)
         }
+        
         act.isHidden = !isLoading
     }
 }
@@ -332,5 +341,18 @@ extension ItemSearchCell {
             isHeightCalculated = true
         }
         return layoutAttributes
+    }
+}
+
+extension Reactive where Base: ItemSearchCell {
+
+    var isAnimating: Binder<Bool> {
+        return Binder(self.base, binding: { (vc, active) in
+            if active {
+                vc.act.startAnimating()
+            } else {
+                vc.act.stopAnimating()
+            }
+        })
     }
 }

@@ -24,14 +24,13 @@ class ItemSearchView: UIView {
     var nameHeightDictionary: [IndexPath: CGFloat]?
     private let disposeBag = DisposeBag()
     
-    let showSearchItem = PublishSubject<[SearchItem]>()
-    
     init(viewModel: ItemSearchViewModel, navItem: UINavigationItem) {
         self.viewModel = viewModel
         self.navItem = navItem
         super.init(frame: CGRect.zero)
         configureView()
         configureConstraints()
+        bindSearchError()
     }
  
     required init?(coder: NSCoder) {
@@ -53,6 +52,7 @@ extension ItemSearchView {
         if #available(iOS 15.0, *) {
             collectionView.dataSource = self.searchDataSource
             configureDataSource()
+            bindSearchItem()
         }
     
         collectionView.delegate = self
@@ -72,12 +72,6 @@ extension ItemSearchView {
         navItem.searchController = searchViewController
         searchViewController.hidesNavigationBarDuringPresentation = false
         navItem.hidesSearchBarWhenScrolling = false
-        
-        viewModel.reloadCollectionView = { [weak self] in
-            DispatchQueue.main.async {
-                self?.applyInitialSnapshots()
-            }
-        }
     }
     
     func configureConstraints()  {
@@ -160,7 +154,6 @@ extension ItemSearchView {
             
         } else {
             // Fallback on earlier versions
-            
             searchDataSource = UICollectionViewDiffableDataSource<Section, SearchItem>(collectionView: collectionView) {
                 (collectionView: UICollectionView, indexPath: IndexPath, identifier: SearchItem) -> UICollectionViewCell? in
                 return collectionView.dequeueReusableCell(withReuseIdentifier: ItemSearchCell.reuseIdentifier, for: indexPath)
@@ -238,6 +231,56 @@ extension ItemSearchView: UISearchBarDelegate {
         }
     }
     
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        closeSearchView()
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchText == "" {
+            closeSearchView()
+        }
+    }
+    
+    func closeSearchView() {
+        endEditing(true)
+    }
+}
+
+// MARK: - Bind
+extension ItemSearchView {
+    func bindSearchItem() {
+        
+        viewModel.searchItem
+            .observe(on: MainScheduler.instance)
+            .subscribe { [self] elements in
+                DispatchQueue.main.async {
+                    applyInitialSnapshots()
+                }
+            }
+            .disposed(by: disposeBag)
+    }
+    
+    func bindSearchError() {
+        viewModel.onShowError
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { (error) in
+           
+                switch error {
+                    case .timeOut:
+                        self.showAlert(message: "Server TimeOut")
+                    case .notFound:
+                        self.showAlert(message: "Search Keyword notFound")
+                    default:
+                        self.showAlert(message: error.localizedDescription)
+                }
+        })
+        .disposed(by: disposeBag)
+    }
+}
+
+// MARK: - Private
+extension ItemSearchView {
+    
     func configureDataSource(cell: ItemSearchCell, itemIdentifier: SearchItem, index: Int) {
         
         let indexPath = IndexPath(item: index, section: 0)
@@ -255,17 +298,20 @@ extension ItemSearchView: UISearchBarDelegate {
         }
     }
     
-    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        closeSearchView()
-    }
-    
-    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        if searchText == "" {
-            closeSearchView()
+    func showAlert(message: String) {
+        
+        DispatchQueue.main.async {
+            
+            guard let presentVC = UIApplication.shared.keyWindowPresentedController else {
+                return
+            }
+            
+            let alertController = UIAlertController(title: NSLocalizedString("Attention", comment: ""), message: message, preferredStyle: .alert)
+     
+            alertController.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: .default) { action in
+                
+            })
+            presentVC.present(alertController, animated: true, completion: nil)
         }
-    }
-    
-    func closeSearchView() {
-        endEditing(true)
     }
 }

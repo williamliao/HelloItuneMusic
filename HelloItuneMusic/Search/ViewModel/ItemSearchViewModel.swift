@@ -17,17 +17,17 @@ enum ItemSearchCellType {
 class ItemSearchViewModel {
     let apiClient: APIClient
     
-    private(set) var isFetching = false
     private let disposeBag = DisposeBag()
-    
-    var reloadCollectionView: (() -> Void)?
-    var showError: ((_ error:NetworkError) -> Void)?
+
     var searchModel: ItemSearchModel!
     var decoder = JSONDecoder()
 
     var subItems : [SearchItem] = []
     let urlSession: URLSession
     
+    let onShowError: PublishSubject<NetworkError> = PublishSubject()
+    let searchItem: PublishSubject<[SearchItem]> = PublishSubject()
+
     init(apiClient: APIClient, urlSession: URLSession = .shared) {
         self.apiClient = apiClient
         self.urlSession = urlSession
@@ -43,31 +43,38 @@ extension ItemSearchViewModel {
         }
 
         do {
-            let result = try await apiClient.fetch(enPoint, decode: { [self]  json -> ItemSearchModel? in
-                isFetching = false
+            let result = try await apiClient.fetch(enPoint, decode: { json -> ItemSearchModel? in
                 guard let feedResult = json as? ItemSearchModel else { return  nil }
                 return feedResult
             })
             
             switch result {
                 case .success(let responseObject):
-                    searchModel = responseObject
 
-                    searchModel.results.forEach { result in
+                    if responseObject.results.count == 0 {
+                        onShowError.onNext( NetworkError.notFound )
+                        onShowError.onCompleted()
+                        return
+                    }
+
+                    responseObject.results.forEach { result in
                         let item = SearchItem(id: UUID() ,name: result.trackName, longDescription: result.longDescription, artworkUrl100: result.artworkUrl100, previewUrl: result.previewUrl)
                         subItems.append(item)
                     }
                 
-                    reloadCollectionView?()
+                    searchItem.onNext( subItems )
+                    searchItem.onCompleted()
+                
                 case .failure(let error):
                     print("searchTask \(error)")
-                    showError?(error)
+                    onShowError.onNext( error )
+                    onShowError.onCompleted()
             }
             
         }  catch  {
-            isFetching = false
             print("searchTask error \(error)")
-            showError?(error as? NetworkError ?? NetworkError.unKnown)
+            onShowError.onNext( error as? NetworkError ?? NetworkError.unKnown )
+            onShowError.onCompleted()
         }
         
     }
@@ -77,7 +84,7 @@ extension ItemSearchViewModel {
         guard let enPoint = EndPoint.search(matching: term).url else {
             return .just([])
         }
-        
+       
         return Observable.create { [self] observer in
 
             urlSession.rx.data(request: URLRequest(url: enPoint))
@@ -96,10 +103,13 @@ extension ItemSearchViewModel {
                         
                     } catch  {
                         print("error \(error)")
+                        onShowError.onNext( error as? NetworkError ?? NetworkError.unKnown )
+                        onShowError.onCompleted()
                     }
  
                 }, onError: { error in
-                    print("Data Task Error: \(error)")
+                    onShowError.onNext( error as? NetworkError ?? NetworkError.unKnown )
+                    onShowError.onCompleted()
                 })
                 .disposed(by: disposeBag)
             
