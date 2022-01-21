@@ -53,8 +53,9 @@ extension ItemSearchView {
             configureDataSource()
             bindSearchItem()
         }
-    
-        collectionView.delegate = self
+        
+        collectionView.rx.setDelegate(self)
+            .disposed(by: disposeBag)
 
         if #available(iOS 13.0, *) {
             collectionView.register(ItemSearchCell.self, forCellWithReuseIdentifier: ItemSearchCell.reuseIdentifier)
