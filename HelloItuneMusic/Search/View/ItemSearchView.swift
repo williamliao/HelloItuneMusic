@@ -146,7 +146,6 @@ extension ItemSearchView {
                 switch itemIdentifier {
                     case .normal( let item):
                         configureDataSource(cell: cell, itemIdentifier: item, index: indexPath.row)
-                        break
                     case .error(let message):
                         cell.nameLabel.text = message
                     case .empty:

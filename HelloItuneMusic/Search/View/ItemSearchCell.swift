@@ -124,8 +124,9 @@ class ItemSearchCell: UICollectionViewCell {
     }
 }
 
+// MARK: - View
 extension ItemSearchCell {
-    func configureView() {
+    private func configureView() {
         act.color = traitCollection.userInterfaceStyle == .light ? UIColor.black : UIColor.white
         self.contentView.addSubview(progressBarView)
         self.contentView.addSubview(act)
@@ -137,7 +138,7 @@ extension ItemSearchCell {
         loadInProgress.bind(to: act.rx.isAnimating).disposed(by: disposeBag)
     }
     
-    func bindButton() {
+    private func bindButton() {
         if #available(iOS 15.0, *) {
             playButton.addTarget(self, action: #selector(playTap), for: .touchUpInside)
         } else {
@@ -149,7 +150,7 @@ extension ItemSearchCell {
         }
     }
     
-    func configureConstraints() {
+    private func configureConstraints() {
         
         nameHeightConstraint = nameLabel.heightAnchor.constraint(equalToConstant: 16)
        
@@ -186,6 +187,7 @@ extension ItemSearchCell {
     }
 }
 
+// MARK: - Public
 extension ItemSearchCell {
     func configureCell(name: String?, des: String?, imageUrl: String?, previewUrl: String?) {
         
@@ -207,6 +209,7 @@ extension ItemSearchCell {
                         isLoading(isLoading: false)
                     } catch  {
                         print("downloadImage error \(error)")
+                        nameLabel.text = error.localizedDescription
                     }
                 }
             } else {
@@ -225,17 +228,28 @@ extension ItemSearchCell {
                             self?.isLoading(isLoading: false)
                             self?.avatarImage.image = image
                         }
-                    }, onError: { error in
+                    }, onError: { [self] error in
                         print("Data Task Error: \(error)")
+                        nameLabel.text = error.localizedDescription
                     })
                     .disposed(by: disposeBag)
             }
             
         }
     }
+
+    func stopPlayAfterTapOtherCell() {
+        player?.pause()
+        playButton.setTitle("Play", for: UIControl.State.normal)
+        progressBarView.progress = 0
+    }
+}
+
+// MARK: - Private
+extension ItemSearchCell {
     
     @available(iOS 15.0, *)
-    func downloadImage(_ imageUrl: URL?) async throws -> UIImage? {
+    private func downloadImage(_ imageUrl: URL?) async throws -> UIImage? {
         
         guard let imageUrl = imageUrl else {
             return nil
@@ -249,7 +263,7 @@ extension ItemSearchCell {
         return image
     }
     
-    func height(withString string: String, font: UIFont) -> CGFloat {
+    private func height(withString string: String, font: UIFont) -> CGFloat {
 
         let width = self.contentView.frame.size.width
         let constraintRect = CGSize(width: width, height: .greatestFiniteMagnitude)
@@ -258,7 +272,7 @@ extension ItemSearchCell {
         return ceil(boundingBox.height)
     }
     
-    func isLoading(isLoading: Bool) {
+    private func isLoading(isLoading: Bool) {
         
         if #available(iOS 15.0, *)  {
             if isLoading {
@@ -272,9 +286,7 @@ extension ItemSearchCell {
         
         act.isHidden = !isLoading
     }
-}
-
-extension ItemSearchCell {
+    
     @objc private func playTap() {
         playAction?()
      
@@ -309,13 +321,7 @@ extension ItemSearchCell {
             isPlaying = false
         }
     }
-    
-    func stopPlayAfterTapOtherCell() {
-        player?.pause()
-        playButton.setTitle("Play", for: UIControl.State.normal)
-        progressBarView.progress = 0
-    }
-
+  
     private func addPeriodicTimeObserver() {
         
         let interval = CMTime(seconds: 0.5,

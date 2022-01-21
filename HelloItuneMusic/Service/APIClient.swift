@@ -48,15 +48,72 @@ enum NetworkError: Error {
 class APIClient {
     
     let session: URLSession
-    var decoder = JSONDecoder()
+    let decoder: JSONDecoder
     
-    init(session: URLSession = .shared) {
+    init(session: URLSession = .shared, decoder: JSONDecoder = JSONDecoder()) {
         self.session = session
+        self.decoder = decoder
     }
     
     let successCodes: CountableRange<Int> = 200..<299
     let failureClientCodes: CountableRange<Int> = 400..<499
     let failureBackendCodes: CountableRange<Int> = 500..<511
+    
+    func fetch<T: Decodable>(_ endpoint: URL, decode: @escaping (Decodable) -> T?) async throws -> Result<T, NetworkError> {
+        
+        try Task.checkCancellation()
+        
+        do {
+            return try await withCheckedThrowingContinuation({
+                (continuation: CheckedContinuation<(Result<T, NetworkError>), Error>) in
+                loadRequest(endpoint, decode: decode) { result in
+                    switch result {
+                        case .success(let data):
+                            continuation.resume(returning: .success(data))
+                        case .failure(let error):
+                            continuation.resume(throwing: error)
+                    }
+                }
+            })
+        } catch {
+            print("fetch error \(error)")
+            return Result.failure(NetworkError.unKnown)
+        }
+    }
+}
+
+// MARK: - Private
+extension APIClient {
+    
+    private func loadRequest<T: Decodable>(_ endpoint: URL, decode: @escaping (Decodable) -> T?, then handler: @escaping (Result<T, NetworkError>) -> Void) {
+        
+        let request = clientURLRequest(url: endpoint)
+        
+        let task = decodingTask(with: request, decodingType: T.self) { (json , error) in
+            
+            DispatchQueue.main.async {
+                guard let json = json else {
+                    if let error = error {
+                        handler(Result.failure(error))
+                    }
+                    return
+                }
+
+                if let value = decode(json) {
+                    handler(.success(value))
+                }
+            }
+        }
+        task.resume()
+    }
+    
+    private func clientURLRequest(url: URL) -> URLRequest {
+        
+        let request = NSMutableURLRequest(url: url,
+                                              cachePolicy: .useProtocolCachePolicy,
+                                              timeoutInterval: 10.0)
+        return request as URLRequest
+    }
     
     private func decodingTask<T: Decodable>(with request: URLRequest, decodingType: T.Type, completionHandler completion: @escaping (Decodable?, NetworkError?) -> ()) -> URLSessionDataTask {
      
@@ -107,60 +164,6 @@ class APIClient {
             return task
     }
     
-    func fetch<T: Decodable>(_ endpoint: URL, decode: @escaping (Decodable) -> T?) async throws -> Result<T, NetworkError> {
-        
-        try Task.checkCancellation()
-        
-        do {
-            return try await withCheckedThrowingContinuation({
-                (continuation: CheckedContinuation<(Result<T, NetworkError>), Error>) in
-                loadRequest(endpoint, decode: decode) { result in
-                    switch result {
-                        case .success(let data):
-                            continuation.resume(returning: .success(data))
-                        case .failure(let error):
-                            continuation.resume(throwing: error)
-                    }
-                }
-            })
-        } catch {
-            print("fetch error \(error)")
-            return Result.failure(NetworkError.unKnown)
-        }
-    }
-    
-    func loadRequest<T: Decodable>(_ endpoint: URL, decode: @escaping (Decodable) -> T?, then handler: @escaping (Result<T, NetworkError>) -> Void) {
-        
-        let request = clientURLRequest(url: endpoint)
-        
-        let task = decodingTask(with: request, decodingType: T.self) { (json , error) in
-            
-            DispatchQueue.main.async {
-                guard let json = json else {
-                    if let error = error {
-                        handler(Result.failure(error))
-                    }
-                    return
-                }
-
-                if let value = decode(json) {
-                    handler(.success(value))
-                }
-            }
-        }
-        task.resume()
-    }
-    
-    func clientURLRequest(url: URL) -> URLRequest {
-        
-        let request = NSMutableURLRequest(url: url,
-                                              cachePolicy: .useProtocolCachePolicy,
-                                              timeoutInterval: 10.0)
-        return request as URLRequest
-    }
-}
-
-extension APIClient {
     private func handleHTTPResponse(statusCode: Int) -> NetworkError {
         
         if failureClientCodes.contains(statusCode) { //400..<499

@@ -78,13 +78,3 @@ struct Results: Codable {
     let longDescription: String?
     let hasITunesExtras: Bool?
 }
-
-extension Results: Hashable, Equatable {
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(trackId)
-    }
-
-    static func == (lhs: Results, rhs: Results) -> Bool {
-        return lhs.trackId == rhs.trackId
-    }
-}

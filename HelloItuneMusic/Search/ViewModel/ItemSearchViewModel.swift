@@ -31,16 +31,14 @@ extension ItemSearchCellType: Hashable {
 }
 
 class ItemSearchViewModel {
-    let apiClient: APIClient
+    private let apiClient: APIClient
     
-    private let disposeBag = DisposeBag()
-
-    var searchModel: ItemSearchModel!
-    var decoder = JSONDecoder()
+    private var decoder = JSONDecoder()
+    private let urlSession: URLSession
 
     var subItems : [SearchItem] = []
-    let urlSession: URLSession
     
+    private let disposeBag = DisposeBag()
     let cells = BehaviorRelay<[ItemSearchCellType]>(value: [])
     var searchItemCells: Observable<[ItemSearchCellType]> {
         return cells.asObservable()
