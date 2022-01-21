@@ -146,10 +146,13 @@ extension ItemSearchView {
                 switch itemIdentifier {
                     case .normal( let item):
                         configureDataSource(cell: cell, itemIdentifier: item, index: indexPath.row)
+                        cell.playButton.isHidden = false
                     case .error(let message):
                         cell.nameLabel.text = message
+                        cell.playButton.isHidden = true
                     case .empty:
                         cell.nameLabel.text = "NO Data Avaliable"
+                        cell.playButton.isHidden = true
                 }
             }
             
@@ -262,14 +265,14 @@ extension ItemSearchView {
 
                     switch element {
                     case .normal(let itemIdentifier):
-
                         configureDataSource(cell: cell, itemIdentifier: itemIdentifier, index: row)
-
-                        break
+                        cell.playButton.isHidden = false
                     case .error(let message):
                         cell.nameLabel.text = message
+                        cell.playButton.isHidden = true
                     case .empty:
                         cell.nameLabel.text = "No data available"
+                        cell.playButton.isHidden = true
                     }
                 }
                 .disposed(by: disposeBag)
