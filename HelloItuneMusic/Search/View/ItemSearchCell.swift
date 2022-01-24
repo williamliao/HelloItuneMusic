@@ -225,30 +225,6 @@ extension ItemSearchCell {
 // MARK: - Private
 extension ItemSearchCell {
     
-    @available(iOS 15.0, *)
-    private func downloadImage(_ imageUrl: URL?) async throws -> UIImage? {
-        
-        guard let imageUrl = imageUrl else {
-            return nil
-        }
-        isLoading(isLoading: true)
-        let imageRequest = URLRequest(url: imageUrl)
-        let (data, imageResponse) = try await URLSession.shared.data(for: imageRequest)
-        guard let image = UIImage(data: data), (imageResponse as? HTTPURLResponse)?.statusCode == 200 else {
-            throw NetworkError.invalidImage
-        }
-        return image
-    }
-    
-    private func height(withString string: String, font: UIFont) -> CGFloat {
-
-        let width = self.contentView.frame.size.width
-        let constraintRect = CGSize(width: width, height: .greatestFiniteMagnitude)
-
-        let boundingBox = string.boundingRect(with: constraintRect, options: .usesLineFragmentOrigin, attributes: [NSAttributedString.Key.font : font], context: nil)
-        return ceil(boundingBox.height)
-    }
-    
     private func isLoading(isLoading: Bool) {
         
         if #available(iOS 15.0, *)  {

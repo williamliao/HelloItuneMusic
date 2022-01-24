@@ -27,7 +27,6 @@ class ItemSearchCellViewModel {
     var isPlaying: Bool = false
     
     var playAction: (() -> Void)?
-    var timeObserver: Any?
     var timeObserverDisposbale:Disposable?
     
     var rxImage = BehaviorRelay<UIImage?>(value: UIImage(systemName: "person.crop.circle"))
@@ -121,8 +120,6 @@ extension ItemSearchCellViewModel {
             playerItem = AVPlayerItem(url: previewUrl)
             player = AVPlayer(playerItem: playerItem)
             player?.volume = 0.5
-            
-            //addPeriodicTimeObserver()
         }
         
         if isPlaying == true {
