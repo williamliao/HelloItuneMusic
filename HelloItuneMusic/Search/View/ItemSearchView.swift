@@ -102,16 +102,20 @@ extension ItemSearchView: UICollectionViewDelegateFlowLayout {
             return CGSize(width: width, height: baseHeight)
         }
         
-        let res = viewModel.subItems[indexPath.row]
-        
-        if let longDescription = res.longDescription {
+        if (indexPath.row >= 0 && viewModel.subItems.count > indexPath.row) {
+            let res = viewModel.subItems[indexPath.row]
             
-            let constraintRect = CGSize(width: width, height: .greatestFiniteMagnitude)
-            let boundingBox = longDescription.boundingRect(with: constraintRect, options: .usesLineFragmentOrigin, attributes: [NSAttributedString.Key.font : UIFont.systemFont(ofSize: 16)], context: nil)
-            
-            return CGSize(width: width, height: baseHeight + ceil(boundingBox.height) + padding)
+            if let longDescription = res.longDescription {
+                
+                let constraintRect = CGSize(width: width, height: .greatestFiniteMagnitude)
+                let boundingBox = longDescription.boundingRect(with: constraintRect, options: .usesLineFragmentOrigin, attributes: [NSAttributedString.Key.font : UIFont.systemFont(ofSize: 16)], context: nil)
+                
+                return CGSize(width: width, height: baseHeight + ceil(boundingBox.height) + padding)
+            } else {
+                return CGSize(width: width, height: baseHeight + padding)
+            }
         } else {
-            return CGSize(width: width, height: baseHeight + padding)
+            return CGSize(width: width, height: baseHeight)
         }
     }
     
@@ -181,8 +185,9 @@ extension ItemSearchView {
     }
     
     func configureSearchItem() {
-       
+        
         var snapshot = NSDiffableDataSourceSnapshot<Section, ItemSearchCellType>()
+        snapshot.deleteAllItems()
  
         Section.allCases.forEach { snapshot.appendSections([$0]) }
         searchDataSource.apply(snapshot, animatingDifferences: false)

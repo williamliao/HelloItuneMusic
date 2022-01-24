@@ -31,6 +31,7 @@
 		C8128710279E37AC00586D33 /* BundleHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = C812870F279E37AC00586D33 /* BundleHelper.swift */; };
 		C8128712279E681400586D33 /* ItemSearchCellViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8128711279E681400586D33 /* ItemSearchCellViewModel.swift */; };
 		C8128714279E736C00586D33 /* AVPlayer+RxSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8128713279E736C00586D33 /* AVPlayer+RxSwift.swift */; };
+		C8128716279E802800586D33 /* ItemSearchCellViewTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8128715279E802800586D33 /* ItemSearchCellViewTest.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -82,6 +83,7 @@
 		C812870F279E37AC00586D33 /* BundleHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleHelper.swift; sourceTree = "<group>"; };
 		C8128711279E681400586D33 /* ItemSearchCellViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemSearchCellViewModel.swift; sourceTree = "<group>"; };
 		C8128713279E736C00586D33 /* AVPlayer+RxSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVPlayer+RxSwift.swift"; sourceTree = "<group>"; };
+		C8128715279E802800586D33 /* ItemSearchCellViewTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemSearchCellViewTest.swift; sourceTree = "<group>"; };
 		CDBC26B841319C16563E79E4 /* Pods-HelloItuneMusic-HelloItuneMusicUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HelloItuneMusic-HelloItuneMusicUITests.release.xcconfig"; path = "Target Support Files/Pods-HelloItuneMusic-HelloItuneMusicUITests/Pods-HelloItuneMusic-HelloItuneMusicUITests.release.xcconfig"; sourceTree = "<group>"; };
 		D6F5EE11627332F49BA857B3 /* Pods_HelloItuneMusic.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_HelloItuneMusic.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FBF2AA2499E50A5A588F84AE /* Pods-HelloItuneMusic.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HelloItuneMusic.release.xcconfig"; path = "Target Support Files/Pods-HelloItuneMusic/Pods-HelloItuneMusic.release.xcconfig"; sourceTree = "<group>"; };
@@ -173,6 +175,7 @@
 				C812870B279E374000586D33 /* ApiSearchTest.swift */,
 				C812870D279E376300586D33 /* ituneSearch.json */,
 				C812870F279E37AC00586D33 /* BundleHelper.swift */,
+				C8128715279E802800586D33 /* ItemSearchCellViewTest.swift */,
 			);
 			path = HelloItuneMusicTests;
 			sourceTree = "<group>";
@@ -513,6 +516,7 @@
 				C812870C279E374000586D33 /* ApiSearchTest.swift in Sources */,
 				C8128710279E37AC00586D33 /* BundleHelper.swift in Sources */,
 				C81286D32799251400586D33 /* HelloItuneMusicTests.swift in Sources */,
+				C8128716279E802800586D33 /* ItemSearchCellViewTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

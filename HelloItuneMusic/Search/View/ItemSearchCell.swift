@@ -205,7 +205,7 @@ extension ItemSearchCell {
                 viewModel.rxImageOb
                     .bind(to: avatarImage.rx.image)
                     .disposed(by: disposeBag)
-
+                isLoading(isLoading: false)
             }
             
         }
