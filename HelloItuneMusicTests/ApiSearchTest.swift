@@ -159,7 +159,7 @@ extension ApiSearchTest {
     }
 }
 
-private final class MockAppServerClient: APIClient {
+final class MockAppServerClient: APIClient {
     
     var getSearchResult: Result<[SearchItem], NetworkError>?
     
