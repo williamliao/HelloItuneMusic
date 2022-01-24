@@ -70,16 +70,14 @@ class ItemSearchCell: UICollectionViewCell {
     }()
     
     var act = UIActivityIndicatorView(style: .large)
-    private var playerItem:AVPlayerItem?
-    private var player:AVPlayer?
-    private var dataTask: URLSessionDataTask?
-    private var playUrl: String?
-    private let disposeBag = DisposeBag()
     private let loadInProgress: PublishSubject<Bool> = PublishSubject<Bool>()
-    private var isPlaying: Bool = false
-    
-    var playAction: (() -> Void)?
-    var timeObserver: Any?
+    private let disposeBag = DisposeBag()
+
+    var viewModel: ItemSearchCellViewModel? {
+        didSet {
+            bindViewModel()
+        }
+    }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -99,22 +97,18 @@ class ItemSearchCell: UICollectionViewCell {
         descriptionLabel.text = ""
         progressBarView.progress = 0
         isLoading(isLoading: false)
-        
-        player = nil
-        playerItem = nil
-        playUrl = ""
-        playButton.setTitle("Play", for: UIControl.State.normal)
-        
+   
         if #available(iOS 15.0, *) {
             loadingTask?.cancel()
             loadingTask = nil
-        } else {
-            dataTask?.cancel()
-            dataTask = nil
         }
         
-        if let timeObserver = self.timeObserver {
-            self.player?.removeTimeObserver(timeObserver)
+        if let viewModel = viewModel {
+            viewModel.player = nil
+            viewModel.playerItem = nil
+            viewModel.playUrl = ""
+            playButton.setTitle(viewModel.playButtonTitle, for: UIControl.State.normal)
+            viewModel.resetPlayer()
         }
     }
     
@@ -189,59 +183,42 @@ extension ItemSearchCell {
 
 // MARK: - Public
 extension ItemSearchCell {
-    func configureCell(name: String?, des: String?, imageUrl: String?, previewUrl: String?) {
-        
-        descriptionLabel.text = des
-        playUrl = previewUrl
     
-        if let name = name {
-            let height = self.height(withString: name, font: nameLabel.font)
-            nameHeightConstraint.constant = height
-            nameLabel.text = name
-        }
-        
-        if let imageUrl = imageUrl {
-            let url = URL(string: imageUrl)
+    private func bindViewModel() {
+        if let viewModel = viewModel {
+            descriptionLabel.text = viewModel.description
+
+            if let name = viewModel.name {
+                let height = viewModel.height(withString: name, font: nameLabel.font, width: self.contentView.frame.size.width)
+                nameHeightConstraint.constant = height
+                nameLabel.text = name
+            }
+            
+            isLoading(isLoading: true)
             if #available(iOS 15.0, *) {
                 loadingTask = Task {
-                    do {
-                        try await avatarImage.image = downloadImage(url)
-                        isLoading(isLoading: false)
-                    } catch  {
-                        print("downloadImage error \(error)")
-                        nameLabel.text = error.localizedDescription
-                    }
+                    await viewModel.configureImage()
+                    avatarImage.image = viewModel.avatarImage
+                    isLoading(isLoading: false)
                 }
             } else {
-                isLoading(isLoading: true)
-                
-                guard let url = url else {
-                    return
-                }
-                
-                URLSession.shared.rx.data(request: URLRequest(url: url))
-                    .subscribe(onNext: { data in
-                      
-                        let image = UIImage(data: data)
-
-                        DispatchQueue.main.async { [weak self] in
-                            self?.isLoading(isLoading: false)
-                            self?.avatarImage.image = image
-                        }
-                    }, onError: { [self] error in
-                        print("Data Task Error: \(error)")
-                        nameLabel.text = error.localizedDescription
-                    })
+                viewModel.rxImageOb
+                    .bind(to: avatarImage.rx.image)
                     .disposed(by: disposeBag)
+
             }
             
         }
     }
-
+    
     func stopPlayAfterTapOtherCell() {
-        player?.pause()
-        playButton.setTitle("Play", for: UIControl.State.normal)
-        progressBarView.progress = 0
+        if let viewModel = viewModel {
+            viewModel.player?.pause()
+            viewModel.timeObserverDisposbale?.dispose()
+            playButton.setTitle(viewModel.playButtonTitle, for: UIControl.State.normal)
+            progressBarView.progress = 0
+        }
+        
     }
 }
 
@@ -288,51 +265,24 @@ extension ItemSearchCell {
     }
     
     @objc private func playTap() {
-        playAction?()
-     
-        if let url = playUrl, let previewUrl = URL(string: url) {
-            
-            playerItem = AVPlayerItem(url: previewUrl)
-            player = AVPlayer(playerItem: playerItem)
-            player?.volume = 0.5
-            
-            addPeriodicTimeObserver()
-        }
         
-        if isPlaying == true {
-            player?.pause()
+        if let viewModel = viewModel {
+            viewModel.playTap()
+            playButton.setTitle(viewModel.playButtonTitle, for: UIControl.State.normal)
             
-            if let timeObserver = self.timeObserver {
-                self.player?.removeTimeObserver(timeObserver)
-            }
-            playButton.setTitle("Play", for: UIControl.State.normal)
-            progressBarView.progress = 0
-            isPlaying = false
-            return
-        }
-        
-        if player?.rate == 0 {
-            isPlaying = true
-            player?.play()
-            playButton.setTitle("Pause", for: UIControl.State.normal)
-        } else {
-            player?.pause()
-            playButton.setTitle("Play", for: UIControl.State.normal)
-            isPlaying = false
-        }
-    }
-  
-    private func addPeriodicTimeObserver() {
-        
-        let interval = CMTime(seconds: 0.5,
-                              preferredTimescale: CMTimeScale(NSEC_PER_SEC))
-        let mainQueue = DispatchQueue.main
-        self.timeObserver = self.player?.addPeriodicTimeObserver(forInterval: interval, queue: mainQueue) { [weak self] time in
-            let currentSeconds = CMTimeGetSeconds(time)
-            guard let duration = self?.playerItem?.duration else { return }
-            let totalSeconds = CMTimeGetSeconds(duration)
-            let progress: Float = Float(currentSeconds/totalSeconds)
-            self?.progressBarView.progress = progress
+            let mainQueue = DispatchQueue.main
+            viewModel.timeObserverDisposbale = viewModel.player?.rx.playbackPosition(updateInterval: 0.5, updateQueue: mainQueue)
+                .subscribe(onNext: { [self] position in
+                    if viewModel.playButtonTitle != "Play" {
+                        progressBarView.progress = Float(position)
+                    }
+                }, onError: { error in
+                    
+                }, onCompleted: {
+                    
+                }, onDisposed: {
+                    print("### DISPOSED ###")
+                })
         }
     }
 }

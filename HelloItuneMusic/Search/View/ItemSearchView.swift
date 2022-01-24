@@ -287,11 +287,12 @@ extension ItemSearchView {
         
         let indexPath = IndexPath(item: index, section: 0)
         
-        cell.configureCell(name: itemIdentifier.name, des: itemIdentifier.longDescription, imageUrl: itemIdentifier.artworkUrl100, previewUrl: itemIdentifier.previewUrl)
-        
+        let cellViewModel = ItemSearchCellViewModel(itemIdentifier: itemIdentifier)
+        cell.viewModel = cellViewModel
+
         self.nameHeightDictionary?[indexPath] = cell.nameHeightConstraint.constant
         
-        cell.playAction = { [self] in
+        cellViewModel.playAction = { [self] in
             for tempCell in collectionView.visibleCells {
                  if let specificTempCell = tempCell as? ItemSearchCell, specificTempCell != cell{
                      specificTempCell.stopPlayAfterTapOtherCell()

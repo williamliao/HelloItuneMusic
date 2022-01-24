@@ -54,6 +54,8 @@ extension ItemSearchViewModel {
     
     func searchTask(term: String) async throws {
         
+        subItems.removeAll()
+        
         guard let enPoint = EndPoint.search(matching: term).url else {
             throw NetworkError.invalidURL
         }
@@ -95,6 +97,8 @@ extension ItemSearchViewModel {
     }
     
     func searchByTerm(term: String) {
+        
+        subItems.removeAll()
 
         apiClient.getSearchByTerm(term: term)
                 .subscribe(
