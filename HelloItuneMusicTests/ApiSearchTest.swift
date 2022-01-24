@@ -101,6 +101,62 @@ extension ApiSearchTest {
         ).disposed(by: disposeBag)
         wait(for: [expectNormalSearchCellCreated], timeout: 0.1)
     }
+    
+    func testEmptyFriendCells() {
+        let disposeBag = DisposeBag()
+        let appServerClient = MockAppServerClient()
+        appServerClient.getSearchResult = .success([])
+
+        let viewModel = ItemSearchViewModel(apiClient: appServerClient)
+        viewModel.searchByTerm(term: "jason mars")
+
+        let expectEmptyFriendCellCreated = expectation(description: "searchCells contains an empty cell")
+
+        viewModel.searchItemCells.subscribe(
+            onNext: {
+                let firstCellIsEmpty: Bool
+
+                if case.some(.empty) = $0.first {
+                    firstCellIsEmpty = true
+                } else {
+                    firstCellIsEmpty = false
+                }
+
+                XCTAssertTrue(firstCellIsEmpty)
+                expectEmptyFriendCellCreated.fulfill()
+            }
+        ).disposed(by: disposeBag)
+
+        wait(for: [expectEmptyFriendCellCreated],timeout: 0.1)
+    }
+    
+    func testErrorFriendCells() {
+        let disposeBag = DisposeBag()
+        let appServerClient = MockAppServerClient()
+        appServerClient.getSearchResult = .failure(NetworkError.notFound)
+
+        let viewModel = ItemSearchViewModel(apiClient: appServerClient)
+        viewModel.searchByTerm(term: "jason mars")
+
+        let expectErrorFriendCellCreated = expectation(description: "searchCells contains an error cell")
+
+        viewModel.searchItemCells.subscribe(
+            onNext: {
+                let firstCellIsError: Bool
+
+                if case.some(.error) = $0.first {
+                    firstCellIsError = true
+                } else {
+                    firstCellIsError = false
+                }
+
+                XCTAssertTrue(firstCellIsError)
+                expectErrorFriendCellCreated.fulfill()
+            }
+        ).disposed(by: disposeBag)
+
+        wait(for: [expectErrorFriendCellCreated],timeout: 0.1)
+    }
 }
 
 private final class MockAppServerClient: APIClient {
