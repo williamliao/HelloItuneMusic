@@ -51,12 +51,11 @@ extension ItemSearchView {
         if #available(iOS 15.0, *) {
             collectionView.dataSource = self.searchDataSource
             configureDataSource()
-            bindSearchItem()
         }
-        
+        bindSearchItem()
         collectionView.rx.setDelegate(self)
             .disposed(by: disposeBag)
-
+        
         if #available(iOS 13.0, *) {
             collectionView.register(ItemSearchCell.self, forCellWithReuseIdentifier: ItemSearchCell.reuseIdentifier)
         }
@@ -224,8 +223,9 @@ extension ItemSearchView: UISearchBarDelegate {
                 try await viewModel.searchTask(term: strippedString)
             }
         } else {
-            let _ = viewModel.searchByTerm(term: strippedString)
+             viewModel.searchByTerm(term: strippedString)
         }
+        
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
@@ -246,7 +246,7 @@ extension ItemSearchView: UISearchBarDelegate {
 // MARK: - Bind
 extension ItemSearchView {
     func bindSearchItem() {
-        
+
         if #available(iOS 15.0, *) {
             viewModel.searchItemCells
                 .observe(on: MainScheduler.instance)

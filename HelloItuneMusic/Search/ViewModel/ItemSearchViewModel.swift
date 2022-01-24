@@ -94,7 +94,35 @@ extension ItemSearchViewModel {
         
     }
     
-    func searchByTerm(term: String) -> Observable<[SearchItem]> {
+    func searchByTerm(term: String) {
+
+        getSearchByTerm(term: term)
+                .subscribe(
+                    onNext: { [weak self] responseObject in
+
+                        guard responseObject.count > 0 else {
+                            self?.cells.accept([.empty])
+                            return
+                        }
+                        
+                        self?.cells.accept(responseObject.compactMap {
+                            
+                            .normal(item: $0)
+                            
+                        })
+                        
+                        self?.subItems.append(contentsOf: responseObject)
+                        
+                    },
+                    onError: { [weak self] error in
+                
+                        self?.cells.accept([.error( message: (error.localizedDescription))])
+                    }
+                )
+                .disposed(by: disposeBag)
+        }
+    
+    func getSearchByTerm(term: String) -> Observable<[SearchItem]> {
         
         guard let enPoint = EndPoint.search(matching: term).url else {
             return .just([])
@@ -108,24 +136,19 @@ extension ItemSearchViewModel {
                     do {
                         let responseObject = try decoder.decode(ItemSearchModel.self, from: data)
 
-                        if responseObject.results.count == 0 {
-                            cells.accept([.empty])
-
-                            return
-                        }
-                        
-                        cells.accept(responseObject.results.compactMap {
+                        observer.onNext(responseObject.results.compactMap {
                           
-                            .normal(item: SearchItem(id: UUID() ,name: $0.trackName, longDescription: $0.longDescription, artworkUrl100: $0.artworkUrl100, previewUrl: $0.previewUrl))
+                            SearchItem(id: UUID() ,name: $0.trackName, longDescription: $0.longDescription, artworkUrl100: $0.artworkUrl100, previewUrl: $0.previewUrl)
                             
                         })
                         
                     } catch  {
-                        cells.accept([.error( message: (error.localizedDescription))])
+                        observer.onError(error)
                     }
  
                 }, onError: { error in
-                    cells.accept([.error( message: (error.localizedDescription))])
+                    observer.onError(error)
+                   // cells.accept([.error( message: (error.localizedDescription))])
                 })
                 .disposed(by: disposeBag)
             
