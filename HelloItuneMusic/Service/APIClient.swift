@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import RxSwift
+import RxCocoa
 
 enum NetworkError: Error {
     case apiSuccess
@@ -49,6 +51,7 @@ class APIClient {
     
     let session: URLSession
     let decoder: JSONDecoder
+    private let disposeBag = DisposeBag()
     
     init(session: URLSession = .shared, decoder: JSONDecoder = JSONDecoder()) {
         self.session = session
@@ -78,6 +81,39 @@ class APIClient {
         } catch {
             print("fetch error \(error)")
             return Result.failure(NetworkError.unKnown)
+        }
+    }
+    
+    func getSearchByTerm(term: String) -> Observable<[SearchItem]> {
+        
+        guard let enPoint = EndPoint.search(matching: term).url else {
+            return .just([])
+        }
+       
+        return Observable.create { [self] observer in
+
+            session.rx.data(request: URLRequest(url: enPoint))
+                .subscribe(onNext: { data in
+                  
+                    do {
+                        let responseObject = try decoder.decode(ItemSearchModel.self, from: data)
+
+                        observer.onNext(responseObject.results.compactMap {
+                          
+                            SearchItem(id: UUID() ,name: $0.trackName, longDescription: $0.longDescription, artworkUrl100: $0.artworkUrl100, previewUrl: $0.previewUrl)
+                            
+                        })
+                        
+                    } catch  {
+                        observer.onError(error)
+                    }
+ 
+                }, onError: { error in
+                    observer.onError(error)
+                })
+                .disposed(by: disposeBag)
+            
+            return Disposables.create()
         }
     }
 }

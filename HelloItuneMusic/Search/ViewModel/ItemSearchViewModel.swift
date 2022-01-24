@@ -96,7 +96,7 @@ extension ItemSearchViewModel {
     
     func searchByTerm(term: String) {
 
-        getSearchByTerm(term: term)
+        apiClient.getSearchByTerm(term: term)
                 .subscribe(
                     onNext: { [weak self] responseObject in
 
@@ -120,39 +120,5 @@ extension ItemSearchViewModel {
                     }
                 )
                 .disposed(by: disposeBag)
-        }
-    
-    func getSearchByTerm(term: String) -> Observable<[SearchItem]> {
-        
-        guard let enPoint = EndPoint.search(matching: term).url else {
-            return .just([])
-        }
-       
-        return Observable.create { [self] observer in
-
-            urlSession.rx.data(request: URLRequest(url: enPoint))
-                .subscribe(onNext: { data in
-                  
-                    do {
-                        let responseObject = try decoder.decode(ItemSearchModel.self, from: data)
-
-                        observer.onNext(responseObject.results.compactMap {
-                          
-                            SearchItem(id: UUID() ,name: $0.trackName, longDescription: $0.longDescription, artworkUrl100: $0.artworkUrl100, previewUrl: $0.previewUrl)
-                            
-                        })
-                        
-                    } catch  {
-                        observer.onError(error)
-                    }
- 
-                }, onError: { error in
-                    observer.onError(error)
-                   // cells.accept([.error( message: (error.localizedDescription))])
-                })
-                .disposed(by: disposeBag)
-            
-            return Disposables.create()
-        }
     }
 }
