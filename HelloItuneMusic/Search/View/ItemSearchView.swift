@@ -113,7 +113,7 @@ extension ItemSearchView: UICollectionViewDelegateFlowLayout {
                         layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
         
-        let width = UIScreen.main.bounds.size.width
+        let width = UIScreen.main.bounds.size.width - 40
         var baseHeight: Double = 44.0 + 26.0
         let padding: Double = 22.0
         if let nameHeight = nameHeightDictionary?[indexPath] {

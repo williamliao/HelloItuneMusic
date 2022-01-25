@@ -122,6 +122,7 @@ class ItemSearchCell: UICollectionViewCell {
 extension ItemSearchCell {
     private func configureView() {
         act.color = traitCollection.userInterfaceStyle == .light ? UIColor.black : UIColor.white
+        act.translatesAutoresizingMaskIntoConstraints = false
         self.contentView.addSubview(progressBarView)
         self.contentView.addSubview(act)
         self.contentView.addSubview(avatarImage)
