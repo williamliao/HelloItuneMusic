@@ -8,6 +8,7 @@
 import Foundation
 import RxSwift
 import RxCocoa
+import Differentiator
 
 enum ItemSearchCellType {
     case normal(item: SearchItem)
@@ -15,8 +16,19 @@ enum ItemSearchCellType {
     case empty
 }
 
-extension ItemSearchCellType: Hashable {
+extension ItemSearchCellType: Hashable, IdentifiableType {
+    
+    typealias Item = ItemSearchCellType
 
+    var identity: String {
+        return UUID().uuidString
+    }
+
+//    init(original: MySection, items: [Item]) {
+//        self = original
+//        self.items = items
+//    }
+    
     func hash(into hasher: inout Hasher) {
 
         switch self {
@@ -86,6 +98,7 @@ extension ItemSearchViewModel {
                         .normal(item: SearchItem(id: UUID() ,name: $0.trackName, longDescription: $0.longDescription, artworkUrl100: $0.artworkUrl100, previewUrl: $0.previewUrl))
                         
                     })
+                
                
                 case .failure(let error):
                     cells.accept([.error( message: (error.localizedDescription))])
