@@ -10,6 +10,25 @@ import UIKit
 import RxSwift
 import RxCocoa
 import RxDataSources
+import Differentiator
+
+struct MySection {
+    var header: String
+    var items: [Item]
+}
+
+extension MySection : AnimatableSectionModelType {
+    typealias Item = ItemSearchCellType
+
+    var identity: String {
+        return header
+    }
+
+    init(original: MySection, items: [Item]) {
+        self = original
+        self.items = items
+    }
+}
 
 class ItemSearchView: UIView {
     
@@ -38,6 +57,7 @@ class ItemSearchView: UIView {
     }
     
     private var searchDataSource: UICollectionViewDiffableDataSource<Section, ItemSearchCellType>!
+    var dataSource: RxCollectionViewSectionedReloadDataSource<MySection>?
 }
 
 // MARK: - View
@@ -53,6 +73,7 @@ extension ItemSearchView {
             collectionView.dataSource = self.searchDataSource
             configureDataSource()
         }
+        
         bindSearchItem()
         collectionView.rx.setDelegate(self)
             .disposed(by: disposeBag)
@@ -139,6 +160,62 @@ extension ItemSearchView: UICollectionViewDelegateFlowLayout {
     }
 }
 
+// MARK: - RxCollectionViewSectionedReloadDataSource
+extension ItemSearchView {
+    func configureRxDataSource() {
+        let dataSource = RxCollectionViewSectionedReloadDataSource<MySection>(
+            configureCell: { [self] dataSource, collectionView, indexPath, item in
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ItemSearchCell.reuseIdentifier, for: indexPath) as! ItemSearchCell
+                
+                switch item {
+                case .normal(let itemIdentifier):
+                    configureDataSource(cell: cell, itemIdentifier: itemIdentifier, index: indexPath.row)
+                    cell.playButton.isHidden = false
+                case .error(let message):
+                    cell.nameLabel.text = message
+                    cell.playButton.isHidden = true
+                case .empty:
+                    cell.nameLabel.text = "No data available"
+                    cell.playButton.isHidden = true
+                }
+                
+                return cell
+            }
+        )
+        
+        self.dataSource = dataSource
+    }
+    
+    func applyInitialRxDataSource() {
+        
+        var sections = [MySection]()
+        
+        let cells: Observable<[ItemSearchCellType]> = viewModel.cells
+            .flatMap { Observable.from($0).map { $0 }.toArray() }
+        
+        cells
+        .observe(on: MainScheduler.instance)
+        .subscribe { items in
+            
+            guard let cell = items.element else {
+                return
+            }
+            sections.append(MySection(header: "First section", items: cell))
+        }
+        .disposed(by: disposeBag)
+        
+        
+        guard let dataSource = dataSource else {
+            print("no dataSource")
+            return
+        }
+        
+        Observable.just(sections)
+                .bind(to: collectionView.rx.items(dataSource: dataSource))
+                .disposed(by: disposeBag)
+    }
+}
+
 // MARK: - UICollectionViewDiffableDataSource
 extension ItemSearchView {
     func configureDataSource() {
@@ -175,7 +252,6 @@ extension ItemSearchView {
     }
     
     func applyInitialSnapshots() {
-        
         DispatchQueue.main.async { [weak self] in
             self?.updateSnapShot()
         }
@@ -258,7 +334,11 @@ extension ItemSearchView {
                 .observe(on: MainScheduler.instance)
                 .subscribe { [self] elements in
                     DispatchQueue.main.async {
-                        applyInitialSnapshots()
+                        if let count = elements.element?.count {
+                            if count > 0 {
+                                applyInitialSnapshots()
+                            }
+                        }
                     }
                 }
                 .disposed(by: disposeBag)
