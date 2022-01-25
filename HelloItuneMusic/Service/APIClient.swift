@@ -84,35 +84,23 @@ class APIClient {
         }
     }
     
-    func getSearchByTerm(term: String) -> Observable<[SearchItem]> {
+    func getSearchByTerm<T: Decodable>(term: String, decode: @escaping (Decodable) -> T?) -> Observable<T?> {
         
         guard let enPoint = EndPoint.search(matching: term).url else {
-            return .just([])
+            return .just(nil)
         }
        
         return Observable.create { [self] observer in
 
-            session.rx.data(request: URLRequest(url: enPoint))
-                .subscribe(onNext: { data in
-                  
-                    do {
-                        let responseObject = try decoder.decode(ItemSearchModel.self, from: data)
-
-                        observer.onNext(responseObject.results.compactMap {
-                          
-                            SearchItem(id: UUID() ,name: $0.trackName, longDescription: $0.longDescription, artworkUrl100: $0.artworkUrl100, previewUrl: $0.previewUrl)
-                            
-                        })
-                        
-                    } catch  {
+            loadRequest(enPoint, decode: decode) { result in
+                switch result {
+                    case .success(let data):
+                        observer.onNext(data)
+                    case .failure(let error):
                         observer.onError(error)
-                    }
- 
-                }, onError: { error in
-                    observer.onError(error)
-                })
-                .disposed(by: disposeBag)
-            
+                }
+            }
+
             return Disposables.create()
         }
     }

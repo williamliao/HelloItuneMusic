@@ -115,22 +115,33 @@ extension ItemSearchViewModel {
         subItems.removeAll()
         subItems = [SearchItem]()
 
-        apiClient.getSearchByTerm(term: term)
-                .subscribe(
+        apiClient.getSearchByTerm(term: term, decode: { json -> ItemSearchModel? in
+            guard let feedResult = json as? ItemSearchModel else { return  nil }
+            return feedResult
+        })
+            .subscribe(
                     onNext: { [weak self] responseObject in
-
-                        guard responseObject.count > 0 else {
+                        
+                        guard let count = responseObject?.results.count, count > 0 else {
                             self?.cells.accept([.empty])
                             return
                         }
                         
-                        self?.cells.accept(responseObject.compactMap {
+                        guard let results = responseObject?.results else {
+                            self?.cells.accept([.error( message: ("badData"))])
+                            return
+                        }
+                        
+                        results.forEach { result in
+                            let item = SearchItem(id: UUID() ,name: result.trackName, longDescription: result.longDescription, artworkUrl100: result.artworkUrl100, previewUrl: result.previewUrl)
+                            self?.subItems.append(item)
+                        }
+                        
+                        self?.cells.accept(results.compactMap {
                             
-                            .normal(item: $0)
+                            .normal(item: SearchItem(id: UUID() ,name: $0.trackName, longDescription: $0.longDescription, artworkUrl100: $0.artworkUrl100, previewUrl: $0.previewUrl))
                             
                         })
-                        
-                        self?.subItems.append(contentsOf: responseObject)
                         
                     },
                     onError: { [weak self] error in
