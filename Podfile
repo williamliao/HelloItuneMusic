@@ -8,6 +8,7 @@ target 'HelloItuneMusic' do
   # Pods for HelloItuneMusic
   pod 'RxSwift', '6.5.0'
   pod 'RxCocoa', '6.5.0'
+  pod 'RxDataSources'
 
   target 'HelloItuneMusicTests' do
     inherit! :search_paths
