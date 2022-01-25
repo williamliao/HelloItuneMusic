@@ -71,14 +71,9 @@ extension ApiSearchTest {
         let disposeBag = DisposeBag()
         let apiClient = MockAppServerClient()
         
-        let result: ItemSearchModel = decode(from: "ituneSearch", with: "json")
-        var items = [SearchItem]()
+        let result = decode(from: "ituneSearch", with: "json")
 
-        items = result.results.compactMap {
-             SearchItem(id: UUID() ,name: $0.trackName, longDescription: $0.longDescription, artworkUrl100: $0.artworkUrl100, previewUrl: $0.previewUrl)
-        }
-        
-        apiClient.getSearchResult = .success(items)
+        apiClient.getSearchResult = .success(result)
         
         let viewModel = ItemSearchViewModel(apiClient: apiClient)
         viewModel.searchByTerm(term: "jason mars")
@@ -105,7 +100,7 @@ extension ApiSearchTest {
     func testEmptyFriendCells() {
         let disposeBag = DisposeBag()
         let appServerClient = MockAppServerClient()
-        appServerClient.getSearchResult = .success([])
+        appServerClient.getSearchResult = .success(nil)
 
         let viewModel = ItemSearchViewModel(apiClient: appServerClient)
         viewModel.searchByTerm(term: "jason mars")
@@ -161,13 +156,13 @@ extension ApiSearchTest {
 
 final class MockAppServerClient: APIClient {
     
-    var getSearchResult: Result<[SearchItem], NetworkError>?
+    var getSearchResult: Result<Decodable?, NetworkError>?
     
-    override func getSearchByTerm(term: String) -> Observable<[SearchItem]> {
+    override func getSearchByTerm<T: Decodable>(term: String, decode: @escaping (Decodable) -> T?) -> Observable<T?> {
         return Observable.create { observer in
             switch self.getSearchResult {
-            case .success(let result)?:
-                observer.onNext(result)
+            case .success(let result):
+                observer.onNext(result as? T)
             case .failure(let error)?:
                 observer.onError(error)
             case .none:
