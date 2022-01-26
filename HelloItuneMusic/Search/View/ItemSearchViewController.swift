@@ -14,13 +14,10 @@ class ItemSearchViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        renderView()
     }
     
     func renderView() {
        
-        viewModel = ItemSearchViewModel(apiClient: APIClient())
-        
         self.title = "Search"
         searchView = ItemSearchView(viewModel: viewModel, navItem: self.navigationItem)
         searchView.translatesAutoresizingMaskIntoConstraints = false
