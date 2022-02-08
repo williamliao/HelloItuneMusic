@@ -17,7 +17,7 @@ class ItemSearchCell: UICollectionViewCell {
     private var isHeightCalculated: Bool = false
     private var loadingTask: Task<Void, Never>?
     var nameHeightConstraint: NSLayoutConstraint!
-    
+   
     let avatarImage: UIImageView = {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
@@ -148,9 +148,9 @@ extension ItemSearchCell {
     private func configureConstraints() {
         
         nameHeightConstraint = nameLabel.heightAnchor.constraint(equalToConstant: 16)
-       
+
         NSLayoutConstraint.activate([
-            
+
             progressBarView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             progressBarView.topAnchor.constraint(equalTo: contentView.topAnchor),
             progressBarView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
@@ -162,7 +162,7 @@ extension ItemSearchCell {
             avatarImage.widthAnchor.constraint(equalToConstant: 44),
 
             nameLabel.leadingAnchor.constraint(equalTo: avatarImage.trailingAnchor, constant: 5),
-            nameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -15),
+            nameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             nameLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 10),
             nameHeightConstraint,
 
@@ -172,7 +172,7 @@ extension ItemSearchCell {
             playButton.widthAnchor.constraint(equalToConstant: 100),
      
             descriptionLabel.leadingAnchor.constraint(equalTo: avatarImage.trailingAnchor, constant: 5),
-            descriptionLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -15),
+            descriptionLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             descriptionLabel.topAnchor.constraint(equalTo: playButton.bottomAnchor, constant: 5),
             descriptionLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -5),
             
@@ -261,22 +261,6 @@ extension ItemSearchCell {
                     print("### DISPOSED ###")
                 })
         }
-    }
-}
-
-extension ItemSearchCell {
-    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
-        if !isHeightCalculated {
-            setNeedsLayout()
-            layoutIfNeeded()
-            let size = contentView.systemLayoutSizeFitting(layoutAttributes.size)
-            var newFrame = layoutAttributes.frame
-            newFrame.size.width = CGFloat(ceilf(Float(size.width)))
-            newFrame.size.height = CGFloat(ceilf(Float(size.height)))
-            layoutAttributes.frame = newFrame
-            isHeightCalculated = true
-        }
-        return layoutAttributes
     }
 }
 

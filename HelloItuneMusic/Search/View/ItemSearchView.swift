@@ -64,7 +64,6 @@ class ItemSearchView: UIView {
 extension ItemSearchView {
     func configureView() {
         let flowLayout = UICollectionViewFlowLayout()
-        flowLayout.estimatedItemSize = .zero
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
         collectionView.backgroundColor = .clear
         collectionView.translatesAutoresizingMaskIntoConstraints = false
@@ -112,26 +111,26 @@ extension ItemSearchView: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
-        
+
         let width = UIScreen.main.bounds.size.width - 40
         var baseHeight: Double = 44.0 + 26.0
         let padding: Double = 22.0
         if let nameHeight = nameHeightDictionary?[indexPath] {
             baseHeight = baseHeight + nameHeight
         }
-        
+
         if viewModel.subItems.count == 0 {
             return CGSize(width: width, height: baseHeight)
         }
-        
+
         if (indexPath.row >= 0 && viewModel.subItems.count > indexPath.row) {
             let res = viewModel.subItems[indexPath.row]
-            
+
             if let longDescription = res.longDescription {
-                
+
                 let constraintRect = CGSize(width: width, height: .greatestFiniteMagnitude)
                 let boundingBox = longDescription.boundingRect(with: constraintRect, options: .usesLineFragmentOrigin, attributes: [NSAttributedString.Key.font : UIFont.systemFont(ofSize: 16)], context: nil)
-                
+
                 return CGSize(width: width, height: baseHeight + ceil(boundingBox.height) + padding)
             } else {
                 return CGSize(width: width, height: baseHeight + padding)
