@@ -196,7 +196,7 @@ extension ItemSearchCell {
             playButton.widthAnchor.constraint(equalToConstant: 100),
      
             descriptionLabel.leadingAnchor.constraint(equalTo: avatarImage.trailingAnchor, constant: 5),
-            descriptionLabel.trailingAnchor.constraint(equalTo: audioBackgroudView.trailingAnchor),
+            descriptionLabel.trailingAnchor.constraint(equalTo: audioBackgroudView.trailingAnchor, constant: -10),
             descriptionLabel.topAnchor.constraint(equalTo: playButton.bottomAnchor, constant: 5),
             descriptionLabel.bottomAnchor.constraint(equalTo: audioBackgroudView.bottomAnchor, constant: -5),
             desHeightConstraint,
