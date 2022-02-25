@@ -41,8 +41,9 @@ class ItemSearchView: UIView {
     
     var viewModel: ItemSearchViewModel
     var navItem: UINavigationItem
-    var nameHeightDictionary: [IndexPath: CGFloat]?
     private let disposeBag = DisposeBag()
+    
+    var audioIndex = Set<IndexPath>()
     
     init(viewModel: ItemSearchViewModel, navItem: UINavigationItem) {
         self.viewModel = viewModel
@@ -64,6 +65,12 @@ class ItemSearchView: UIView {
 extension ItemSearchView {
     func configureView() {
         let flowLayout = UICollectionViewFlowLayout()
+        flowLayout.sectionInsetReference = .fromContentInset
+        flowLayout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
+        flowLayout.minimumInteritemSpacing = 10
+        flowLayout.minimumLineSpacing = 10
+        flowLayout.sectionInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+        
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
         collectionView.backgroundColor = .clear
         collectionView.translatesAutoresizingMaskIntoConstraints = false
@@ -106,58 +113,7 @@ extension ItemSearchView {
 
 // MARK: - UICollectionViewDelegateFlowLayout
 
-extension ItemSearchView: UICollectionViewDelegateFlowLayout {
-    
-    func collectionView(_ collectionView: UICollectionView,
-                        layout collectionViewLayout: UICollectionViewLayout,
-                        sizeForItemAt indexPath: IndexPath) -> CGSize {
-
-        let width = UIScreen.main.bounds.size.width - 40
-        var baseHeight: Double = 44.0 + 26.0
-        let padding: Double = 22.0
-        if let nameHeight = nameHeightDictionary?[indexPath] {
-            baseHeight = baseHeight + nameHeight
-        }
-
-        if viewModel.subItems.count == 0 {
-            return CGSize(width: width, height: baseHeight)
-        }
-
-        if (indexPath.row >= 0 && viewModel.subItems.count > indexPath.row) {
-            let res = viewModel.subItems[indexPath.row]
-
-            if let longDescription = res.longDescription {
-
-                let constraintRect = CGSize(width: width, height: .greatestFiniteMagnitude)
-                let boundingBox = longDescription.boundingRect(with: constraintRect, options: .usesLineFragmentOrigin, attributes: [NSAttributedString.Key.font : UIFont.systemFont(ofSize: 16)], context: nil)
-
-                return CGSize(width: width, height: baseHeight + ceil(boundingBox.height) + padding)
-            } else {
-                return CGSize(width: width, height: baseHeight + padding)
-            }
-        } else {
-            return CGSize(width: width, height: baseHeight)
-        }
-    }
-    
-    func collectionView(_ collectionView: UICollectionView,
-                        layout collectionViewLayout: UICollectionViewLayout,
-                        insetForSectionAt section: Int) -> UIEdgeInsets {
-        return UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
-    }
-    
-    func collectionView(_ collectionView: UICollectionView,
-                        layout collectionViewLayout: UICollectionViewLayout,
-                        minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
-        return 10
-    }
-    
-    func collectionView(_ collectionView: UICollectionView,
-                        layout collectionViewLayout: UICollectionViewLayout,
-                        minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        return 10
-    }
-}
+extension ItemSearchView: UICollectionViewDelegateFlowLayout {}
 
 // MARK: - RxCollectionViewSectionedReloadDataSource
 extension ItemSearchView {
@@ -263,7 +219,7 @@ extension ItemSearchView {
     func configureSearchItem() {
         
         var snapshot = NSDiffableDataSourceSnapshot<Section, ItemSearchCellType>()
-        snapshot.deleteAllItems()
+       // snapshot.deleteAllItems()
  
         Section.allCases.forEach { snapshot.appendSections([$0]) }
         searchDataSource.apply(snapshot, animatingDifferences: false)
@@ -374,11 +330,11 @@ extension ItemSearchView {
         
         let cellViewModel = ItemSearchCellViewModel(itemIdentifier: itemIdentifier)
         cell.viewModel = cellViewModel
+        audioIndex.insert(indexPath)
 
-        self.nameHeightDictionary?[indexPath] = cell.nameHeightConstraint.constant
-        
         cellViewModel.playAction = { [self] in
-            for tempCell in collectionView.visibleCells {
+            for audioIndexPath in audioIndex {
+                let tempCell = self.collectionView.cellForItem(at: audioIndexPath)
                  if let specificTempCell = tempCell as? ItemSearchCell, specificTempCell != cell{
                      specificTempCell.stopPlayAfterTapOtherCell()
                  }

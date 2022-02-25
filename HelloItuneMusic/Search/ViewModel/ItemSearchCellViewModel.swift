@@ -34,7 +34,7 @@ class ItemSearchCellViewModel {
         return rxImage.asObservable()
     }
     
-    private var itemIdentifier: SearchItem
+    var itemIdentifier: SearchItem
     
     init(itemIdentifier: SearchItem) {
         self.itemIdentifier = itemIdentifier

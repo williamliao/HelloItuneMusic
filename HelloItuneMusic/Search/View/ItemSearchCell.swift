@@ -17,6 +17,7 @@ class ItemSearchCell: UICollectionViewCell {
     private var isHeightCalculated: Bool = false
     private var loadingTask: Task<Void, Never>?
     var nameHeightConstraint: NSLayoutConstraint!
+    var desHeightConstraint: NSLayoutConstraint!
    
     let avatarImage: UIImageView = {
         let imageView = UIImageView()
@@ -69,6 +70,12 @@ class ItemSearchCell: UICollectionViewCell {
         return progressView
     }()
     
+    let audioBackgroudView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     var act = UIActivityIndicatorView(style: .large)
     private let loadInProgress: PublishSubject<Bool> = PublishSubject<Bool>()
     private let disposeBag = DisposeBag()
@@ -78,6 +85,8 @@ class ItemSearchCell: UICollectionViewCell {
             bindViewModel()
         }
     }
+    
+    var widthConstraint: NSLayoutConstraint!
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -123,12 +132,17 @@ extension ItemSearchCell {
     private func configureView() {
         act.color = traitCollection.userInterfaceStyle == .light ? UIColor.black : UIColor.white
         act.translatesAutoresizingMaskIntoConstraints = false
-        self.contentView.addSubview(progressBarView)
-        self.contentView.addSubview(act)
-        self.contentView.addSubview(avatarImage)
-        self.contentView.addSubview(nameLabel)
-        self.contentView.addSubview(descriptionLabel)
-        self.contentView.addSubview(playButton)
+        
+        self.widthConstraint = self.contentView.widthAnchor.constraint(equalToConstant: UIScreen.main.bounds.width)
+       // self.widthConstraint.constant = UIScreen.main.bounds.width
+        
+        self.contentView.addSubview(audioBackgroudView)
+        audioBackgroudView.addSubview(progressBarView)
+        audioBackgroudView.addSubview(act)
+        audioBackgroudView.addSubview(avatarImage)
+        audioBackgroudView.addSubview(nameLabel)
+        audioBackgroudView.addSubview(descriptionLabel)
+        audioBackgroudView.addSubview(playButton)
         
         loadInProgress.bind(to: act.rx.isAnimating).disposed(by: disposeBag)
     }
@@ -148,36 +162,47 @@ extension ItemSearchCell {
     private func configureConstraints() {
         
         nameHeightConstraint = nameLabel.heightAnchor.constraint(equalToConstant: 16)
+        desHeightConstraint = descriptionLabel.heightAnchor.constraint(equalToConstant: 16)
+        
+        //contentView.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-
-            progressBarView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            progressBarView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            progressBarView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            progressBarView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             
-            avatarImage.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 15),
-            avatarImage.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 10),
+            widthConstraint,
+            
+            audioBackgroudView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor),
+            audioBackgroudView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor),
+            audioBackgroudView.topAnchor.constraint(equalTo: self.contentView.topAnchor),
+            audioBackgroudView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor),
+
+            progressBarView.leadingAnchor.constraint(equalTo: audioBackgroudView.leadingAnchor),
+            progressBarView.topAnchor.constraint(equalTo: audioBackgroudView.topAnchor),
+            progressBarView.trailingAnchor.constraint(equalTo: audioBackgroudView.trailingAnchor),
+            progressBarView.bottomAnchor.constraint(equalTo: audioBackgroudView.bottomAnchor),
+            
+            avatarImage.leadingAnchor.constraint(equalTo: audioBackgroudView.leadingAnchor, constant: 15),
+            avatarImage.topAnchor.constraint(equalTo: audioBackgroudView.topAnchor, constant: 10),
             avatarImage.heightAnchor.constraint(equalToConstant: 44),
             avatarImage.widthAnchor.constraint(equalToConstant: 44),
 
             nameLabel.leadingAnchor.constraint(equalTo: avatarImage.trailingAnchor, constant: 5),
-            nameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            nameLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 10),
+            nameLabel.trailingAnchor.constraint(equalTo: audioBackgroudView.trailingAnchor, constant: -5),
+            nameLabel.topAnchor.constraint(equalTo: audioBackgroudView.topAnchor, constant: 10),
             nameHeightConstraint,
 
-            playButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -15),
+            playButton.trailingAnchor.constraint(equalTo: audioBackgroudView.trailingAnchor, constant: -15),
             playButton.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 5),
             playButton.heightAnchor.constraint(equalToConstant: 26),
             playButton.widthAnchor.constraint(equalToConstant: 100),
      
             descriptionLabel.leadingAnchor.constraint(equalTo: avatarImage.trailingAnchor, constant: 5),
-            descriptionLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            descriptionLabel.trailingAnchor.constraint(equalTo: audioBackgroudView.trailingAnchor),
             descriptionLabel.topAnchor.constraint(equalTo: playButton.bottomAnchor, constant: 5),
-            descriptionLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -5),
+            descriptionLabel.bottomAnchor.constraint(equalTo: audioBackgroudView.bottomAnchor, constant: -5),
+            desHeightConstraint,
             
-            act.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            act.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            act.centerXAnchor.constraint(equalTo: audioBackgroudView.centerXAnchor),
+            act.centerYAnchor.constraint(equalTo: audioBackgroudView.centerYAnchor),
         ])
     }
 }
@@ -187,12 +212,27 @@ extension ItemSearchCell {
     
     private func bindViewModel() {
         if let viewModel = viewModel {
+            
             descriptionLabel.text = viewModel.description
-
             if let name = viewModel.name {
-                let height = viewModel.height(withString: name, font: nameLabel.font, width: self.contentView.frame.size.width)
+                let height = viewModel.height(withString: name, font: nameLabel.font, width: UIScreen.main.bounds.width - 44)
                 nameHeightConstraint.constant = height
                 nameLabel.text = name
+            }
+
+            if let des = viewModel.description {
+                let height = viewModel.height(withString: des, font: descriptionLabel.font, width: UIScreen.main.bounds.width - 44)
+                desHeightConstraint.constant = ceil(height)
+              
+            } else {
+                desHeightConstraint.constant = 0
+            }
+            
+            if let long = viewModel.itemIdentifier.longDescription {
+                let height = viewModel.height(withString: long, font: descriptionLabel.font, width: self.contentView.frame.size.width)
+                let baseHeight: Double = 44.0 + 26.0
+                let padding: Double = 22.0
+                desHeightConstraint.constant = baseHeight + ceil(height) + padding
             }
             
             isLoading(isLoading: true)
